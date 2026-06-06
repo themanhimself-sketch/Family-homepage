@@ -1,9 +1,9 @@
 {
-  "name": "Daily Humans",
-  "short_name": "Daily Humans",
+  "name": "Family Homepage",
+  "short_name": "Family",
   "description": "Family dashboard — cleaning, calendar, weather & to-do",
-  "start_url": "/Family-homepage/",
-  "scope": "/Family-homepage/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f7f4ef",
   "theme_color": "#1a1916",
