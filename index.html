@@ -31,7 +31,7 @@
   --teal:            #5ac8fa;
   --navbar-bg:       rgba(242,242,247,0.85);
   --tabbar-bg:       rgba(249,249,249,0.94);
-  --card-bg:         #ffffff;
+  --card-bg:         rgba(255,255,255,0.82);
   --safe-t:          env(safe-area-inset-top, 44px);
   --safe-b:          env(safe-area-inset-bottom, 0px);
   --font:            -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
@@ -59,12 +59,13 @@
     --teal:           #64d2ff;
     --navbar-bg:      rgba(28,28,30,0.85);
     --tabbar-bg:      rgba(28,28,30,0.94);
-    --card-bg:        #1c1c1e;
+    --card-bg:        rgba(28,28,30,0.78);
   }
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(--font); color: var(--label); overflow: hidden; -webkit-font-smoothing: antialiased; }
+#app { position: relative; z-index: 1; }
 #app { height: 100%; display: flex; flex-direction: column; }
 
 /* ── NAVBAR ── */
@@ -128,12 +129,68 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 .wx-fc-hi { font-size: 13px; font-weight: 600; color: var(--label); }
 .wx-fc-lo { font-size: 12px; color: var(--label3); }
 
+
+/* ── WEATHER BACKDROP ── */
+#weather-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  transition: background 2s ease;
+  background: linear-gradient(180deg, #aac7e6 0%, #cfe0ef 100%);
+}
+#weather-bg .sky {
+  position: absolute; inset: 0;
+  transition: opacity 2.5s ease, background 2.5s ease;
+}
+#weather-canvas {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+/* sun / moon orb */
+#weather-bg .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(2px);
+  transition: opacity 3s ease, transform 3s ease, background 3s ease;
+  will-change: transform;
+}
+@keyframes orbDrift {
+  0%   { transform: translate(0,0); }
+  50%  { transform: translate(12px, 18px); }
+  100% { transform: translate(0,0); }
+}
+@keyframes cloudDrift1 {
+  0%   { transform: translateX(-20vw); }
+  100% { transform: translateX(120vw); }
+}
+@keyframes cloudDrift2 {
+  0%   { transform: translateX(-30vw); }
+  100% { transform: translateX(120vw); }
+}
+#weather-bg .cloud {
+  position: absolute;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  opacity: 0.7;
+  will-change: transform;
+}
+@keyframes flicker {
+  0%, 95%, 100% { opacity: 0; }
+  96%, 98% { opacity: 0.35; }
+}
+#weather-bg .lightning {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,0.8);
+  opacity: 0;
+}
+
 /* ── SCROLL BODY ── */
 .scroll-body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  background: var(--sys-grouped-bg);
+  background: transparent;
   padding-bottom: calc(84px + var(--safe-b));
 }
 
@@ -469,6 +526,12 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 </style>
 </head>
 <body>
+<div id="weather-bg">
+  <div class="sky" id="sky-layer"></div>
+  <div class="orb" id="sky-orb"></div>
+  <div class="lightning" id="lightning"></div>
+</div>
+<canvas id="weather-canvas"></canvas>
 <div id="app">
   <div class="navbar">
     <div class="navbar-inner">
@@ -615,6 +678,7 @@ async function fetchWeather(force) {
 }
 function refreshWeather(){ fetchWeather(true); showToast("Refreshing weather…"); }
 function renderWeather() {
+  applyWeatherScene();
   const el = document.getElementById("weatherBar");
   if (!S.weather) { el.innerHTML=`<span class="wx-stat" style="color:var(--label3)">Tap ↻ to load weather</span>`; return; }
   const {temp,code,wind,rain,forecast} = S.weather;
@@ -1037,13 +1101,225 @@ function scheduleNotif(){ if(!S.notifEnabled)return; if(window._notifTimer)clear
 function testNotif(){ const tasks=getDayTasks(todayDayIdx()); new Notification("Family Homepage 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); }
 function resetToday(){ const di=todayDayIdx(); getDayTasks(di).forEach(t=>delete S.checks[`${di}-${t.id}`]); saveChecks(); closeSettings(); render(); showToast("Today reset"); }
 
+
+// ─── WEATHER BACKDROP ENGINE ─────────────────────────────────────────────────
+const WX_SCENE = {
+  clear:   { day:["#5b9bd5","#a8cdf0","#d4e7f7"], night:["#0a1838","#16264f","#243a66"] },
+  cloudy:  { day:["#8fa9c4","#b9cade","#d6e1ec"], night:["#16203a","#222f4d","#33415f"] },
+  overcast:{ day:["#9aa6b2","#bcc5cf","#d2d9e0"], night:["#1a1f28","#2a313c","#3a424e"] },
+  rain:    { day:["#6b7d91","#8b9bad","#aab7c4"], night:["#121823","#1e2733","#2c3744"] },
+  snow:    { day:["#aab6c8","#cdd6e4","#e6ecf4"], night:["#1c2230","#2c3445","#3e4860"] },
+  storm:   { day:["#4a5568","#5e6b82","#74829a"], night:["#0d1018","#171c28","#242b3a"] },
+  fog:     { day:["#b0b8c0","#c8cfd6","#dde2e7"], night:["#222730","#333a44","#454d58"] },
+};
+
+function wxCategory(code) {
+  if (code===0||code===1) return "clear";
+  if (code===2) return "cloudy";
+  if (code===3) return "overcast";
+  if (code===45||code===48) return "fog";
+  if ([51,53,55,61,63,65,80,81,82].includes(code)) return "rain";
+  if ([71,73,75].includes(code)) return "snow";
+  if ([95,96,99].includes(code)) return "storm";
+  return "cloudy";
+}
+
+// returns 'dawn' | 'day' | 'dusk' | 'night' based on local hour
+function timeOfDay() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 8)  return "dawn";
+  if (h >= 8 && h < 18) return "day";
+  if (h >= 18 && h < 21) return "dusk";
+  return "night";
+}
+
+let _wxCanvas, _wxCtx, _wxParticles = [], _wxRAF = null, _wxClouds = [];
+
+function applyWeatherScene() {
+  if (!S.weather) return;
+  const cat = wxCategory(S.weather.code);
+  const tod = timeOfDay();
+  const isNight = tod === "night";
+  const scene = WX_SCENE[cat] || WX_SCENE.cloudy;
+  const palette = isNight ? scene.night : scene.day;
+
+  const bg = document.getElementById("weather-bg");
+  const sky = document.getElementById("sky-layer");
+  const orb = document.getElementById("sky-orb");
+  const lightning = document.getElementById("lightning");
+  if (!bg) return;
+
+  // Base gradient
+  let grad = `linear-gradient(180deg, ${palette[0]} 0%, ${palette[1]} 55%, ${palette[2]} 100%)`;
+  bg.style.background = grad;
+
+  // Dawn / dusk warm tint overlay
+  let tint = "transparent";
+  if (tod === "dawn") tint = "linear-gradient(180deg, rgba(255,180,120,0.35) 0%, rgba(255,200,150,0.12) 40%, transparent 70%)";
+  if (tod === "dusk") tint = "linear-gradient(180deg, rgba(255,140,90,0.30) 0%, rgba(255,120,140,0.15) 45%, transparent 75%)";
+  sky.style.background = tint;
+  sky.style.opacity = 1;
+
+  // Sun / moon orb
+  const showOrb = (cat === "clear" || cat === "cloudy");
+  if (showOrb) {
+    orb.style.opacity = "1";
+    const size = 140;
+    orb.style.width = size + "px";
+    orb.style.height = size + "px";
+    orb.style.left = "62%";
+    orb.style.top = isNight ? "14%" : "10%";
+    orb.style.animation = "orbDrift 30s ease-in-out infinite";
+    if (isNight) {
+      orb.style.background = "radial-gradient(circle at 38% 38%, #f4f4ea 0%, #d8d8c8 55%, rgba(216,216,200,0) 72%)";
+    } else if (tod === "dawn") {
+      orb.style.background = "radial-gradient(circle, rgba(255,225,170,0.95) 0%, rgba(255,200,130,0.5) 45%, rgba(255,200,130,0) 70%)";
+    } else if (tod === "dusk") {
+      orb.style.background = "radial-gradient(circle, rgba(255,190,140,0.95) 0%, rgba(255,150,110,0.5) 45%, rgba(255,150,110,0) 70%)";
+    } else {
+      orb.style.background = "radial-gradient(circle, rgba(255,250,220,0.95) 0%, rgba(255,240,190,0.55) 45%, rgba(255,240,190,0) 72%)";
+    }
+  } else {
+    orb.style.opacity = "0";
+    orb.style.animation = "none";
+  }
+
+  // Lightning flicker for storms
+  lightning.style.animation = (cat === "storm") ? "flicker 8s linear infinite" : "none";
+
+  // Drifting clouds (DOM-based, behind cards)
+  renderClouds(cat, isNight);
+
+  // Canvas particles (rain / snow)
+  startParticles(cat);
+}
+
+function renderClouds(cat, isNight) {
+  const bg = document.getElementById("weather-bg");
+  // clear existing
+  bg.querySelectorAll(".cloud").forEach(el => el.remove());
+  let count = 0;
+  if (cat === "cloudy") count = 3;
+  if (cat === "overcast" || cat === "rain" || cat === "storm") count = 5;
+  if (cat === "fog") count = 6;
+  const opacity = isNight ? 0.25 : (cat === "fog" ? 0.55 : 0.7);
+  for (let i = 0; i < count; i++) {
+    const cloud = document.createElement("div");
+    cloud.className = "cloud";
+    const w = 180 + Math.random() * 220;
+    cloud.style.width = w + "px";
+    cloud.style.height = (w * 0.5) + "px";
+    cloud.style.top = (5 + Math.random() * 45) + "%";
+    cloud.style.opacity = opacity;
+    const dur = 40 + Math.random() * 50;
+    const delay = -Math.random() * dur;
+    cloud.style.animation = `cloudDrift${(i%2)+1} ${dur}s linear ${delay}s infinite`;
+    if (isNight) cloud.style.filter = "brightness(0.6)";
+    bg.appendChild(cloud);
+  }
+}
+
+function startParticles(cat) {
+  _wxCanvas = document.getElementById("weather-canvas");
+  if (!_wxCanvas) return;
+  _wxCtx = _wxCanvas.getContext("2d");
+  resizeCanvas();
+
+  const isRain = cat === "rain" || cat === "storm";
+  const isSnow = cat === "snow";
+
+  if (!isRain && !isSnow) {
+    // no particles — clear and stop
+    if (_wxRAF) cancelAnimationFrame(_wxRAF);
+    _wxRAF = null;
+    _wxCtx.clearRect(0,0,_wxCanvas.width,_wxCanvas.height);
+    _wxParticles = [];
+    return;
+  }
+
+  const W = _wxCanvas.width, H = _wxCanvas.height;
+  const count = isRain ? (cat === "storm" ? 220 : 150) : 90;
+  _wxParticles = [];
+  for (let i = 0; i < count; i++) {
+    if (isRain) {
+      _wxParticles.push({
+        x: Math.random()*W, y: Math.random()*H,
+        len: 10 + Math.random()*14,
+        speed: 8 + Math.random()*7,
+        opacity: 0.15 + Math.random()*0.25,
+      });
+    } else {
+      _wxParticles.push({
+        x: Math.random()*W, y: Math.random()*H,
+        r: 1.5 + Math.random()*2.5,
+        speedY: 0.6 + Math.random()*1.2,
+        drift: Math.random()*1.2 - 0.6,
+        phase: Math.random()*Math.PI*2,
+        opacity: 0.4 + Math.random()*0.4,
+      });
+    }
+  }
+
+  if (_wxRAF) cancelAnimationFrame(_wxRAF);
+  const dpr = window.devicePixelRatio || 1;
+
+  function frame() {
+    _wxCtx.clearRect(0,0,_wxCanvas.width,_wxCanvas.height);
+    if (isRain) {
+      _wxCtx.strokeStyle = "rgba(200,215,230,0.5)";
+      _wxCtx.lineWidth = 1.1 * dpr;
+      _wxParticles.forEach(p => {
+        _wxCtx.globalAlpha = p.opacity;
+        _wxCtx.beginPath();
+        _wxCtx.moveTo(p.x, p.y);
+        _wxCtx.lineTo(p.x - 2*dpr, p.y + p.len*dpr);
+        _wxCtx.stroke();
+        p.y += p.speed * dpr;
+        p.x -= 1 * dpr;
+        if (p.y > _wxCanvas.height) { p.y = -20; p.x = Math.random()*_wxCanvas.width; }
+      });
+    } else {
+      _wxCtx.fillStyle = "#ffffff";
+      _wxParticles.forEach(p => {
+        _wxCtx.globalAlpha = p.opacity;
+        _wxCtx.beginPath();
+        _wxCtx.arc(p.x, p.y, p.r*dpr, 0, Math.PI*2);
+        _wxCtx.fill();
+        p.y += p.speedY * dpr;
+        p.phase += 0.02;
+        p.x += Math.sin(p.phase) * p.drift * dpr;
+        if (p.y > _wxCanvas.height) { p.y = -10; p.x = Math.random()*_wxCanvas.width; }
+      });
+    }
+    _wxCtx.globalAlpha = 1;
+    _wxRAF = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function resizeCanvas() {
+  if (!_wxCanvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  _wxCanvas.width = window.innerWidth * dpr;
+  _wxCanvas.height = window.innerHeight * dpr;
+  _wxCanvas.style.width = window.innerWidth + "px";
+  _wxCanvas.style.height = window.innerHeight + "px";
+}
+window.addEventListener("resize", () => { resizeCanvas(); if (S.weather) startParticles(wxCategory(S.weather.code)); });
+
+// Re-evaluate time-of-day tint every 10 minutes
+setInterval(() => { if (S.weather) applyWeatherScene(); }, 10*60*1000);
+
+
 // ─── INSTALL / TOAST ─────────────────────────────────────────────────────────
 function checkInstall(){ if(localStorage.getItem("installDismissed")||window.navigator.standalone||!/Safari/.test(navigator.userAgent)||/Chrome/.test(navigator.userAgent))return; document.getElementById("installBanner").innerHTML=`<div class="install-banner"><span class="install-text">Tap <strong>⎙ Share</strong> → <strong>Add to Home Screen</strong> for daily alerts</span><span class="install-close" onclick="localStorage.setItem('installDismissed','1');this.closest('.install-banner').remove()">×</span></div>`; }
 function showToast(msg){ const el=document.createElement("div"); el.className="toast"; el.textContent=msg; document.body.appendChild(el); setTimeout(()=>el.remove(),2200); }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 document.getElementById("navDate").textContent = new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
-load(); render(); checkInstall(); fetchWeather();
+load(); render(); checkInstall();
+if (S.weather) applyWeatherScene();
+fetchWeather();
 if (S.icalUrl) fetchCal(false);
 if (S.notifEnabled&&typeof Notification!=="undefined"&&Notification.permission==="granted") scheduleNotif();
 
