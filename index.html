@@ -559,7 +559,7 @@ const S = {
   tab: "today", activeDay: null,
   checks: {}, checksDate: "", todos: [], notes: "",
   notifTime: "08:00", notifEnabled: false,
-  icalUrl: "", calLastFetched: "", calEvents: [],
+  icalUrl: "", calLastFetched: "", calEvents: [], calError: null,
   weather: null, weatherTs: 0,
 };
 function load() {
@@ -646,20 +646,38 @@ function renderWeather() {
 async function fetchCal(showToastMsg) {
   if (!S.icalUrl) return;
   const url = S.icalUrl.replace("webcal://","https://");
-  const cacheBustedUrl = url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
-  const proxy = `https://corsproxy.io/?${encodeURIComponent(cacheBustedUrl)}`;
-  try {
-    const r = await fetch(proxy);
-    const text = await r.text();
-    S.calEvents = parseIcal(text);
-    const now = new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
-    S.calLastFetched = now;
-    localStorage.setItem("calLastFetched",now);
-    if (showToastMsg) showToast("Calendar refreshed ✓");
-    render();
-  } catch(e) {
-    if (showToastMsg) showToast("Could not reach calendar — try again");
+  
+  // Try multiple proxies in order
+  const proxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+  
+  let lastError = "";
+  for (const proxy of proxies) {
+    try {
+      const r = await fetch(proxy);
+      if (!r.ok) { lastError = `HTTP ${r.status}`; continue; }
+      const text = await r.text();
+      if (!text.includes("BEGIN:VCALENDAR")) { lastError = "Response is not a valid iCal feed"; continue; }
+      S.calEvents = parseIcal(text);
+      S.calError = null;
+      const now = new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+      S.calLastFetched = now;
+      localStorage.setItem("calLastFetched",now);
+      if (showToastMsg) showToast(`Calendar refreshed ✓ (${S.calEvents.length} events)`);
+      render();
+      return;
+    } catch(e) {
+      lastError = e.message;
+      continue;
+    }
   }
+  // All proxies failed
+  S.calError = lastError;
+  if (showToastMsg) showToast("Calendar fetch failed — see Calendar tab");
+  render();
 }
 function parseIcal(text) {
   const events=[], blocks=text.split("BEGIN:VEVENT");
@@ -891,22 +909,19 @@ function selectDay(i){ S.activeDay=i; render(); }
 // ─── CALENDAR TAB ─────────────────────────────────────────────────────────────
 function renderCalendar() {
   if (!S.icalUrl) return `<div class="table-group"><div class="table-card"><div class="setup-cell" style="padding:24px"><div class="setup-text">Connect your calendar in Settings to see events here.</div><div class="setup-link" onclick="openSettings()">Open Settings →</div></div></div></div>`;
-  let html=`<div class="table-group">
-    <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px">
-      <span>${S.calLastFetched?"Synced "+S.calLastFetched:""}</span>
-      <span class="sync-btn" onclick="fetchCal(true)">↻ Refresh</span>
-    </div>
-  </div>`;
+
+  const syncBar = `<div class="table-group" style="margin-bottom:0"><div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px;align-items:center"><span style="color:var(--label3)">${S.calLastFetched ? "Synced "+S.calLastFetched+" &middot; "+S.calEvents.length+" events" : "Tap refresh to load"}</span><span class="sync-btn" onclick="fetchCal(true)">&#8635; Refresh</span></div></div>`;
+
+  const errorBar = S.calError ? `<div class="table-group"><div class="table-card"><div style="padding:14px 16px"><div style="font-size:14px;color:var(--red);margin-bottom:6px">Could not load calendar</div><div style="font-size:13px;color:var(--label2);margin-bottom:10px">${S.calError}</div><span style="font-size:15px;color:var(--blue);font-weight:500;cursor:pointer" onclick="openSettings()">Check Settings</span>&nbsp;&nbsp;<span style="font-size:15px;color:var(--blue);font-weight:500;cursor:pointer" onclick="fetchCal(true)">Retry</span></div></div></div>` : "";
+
+  let html = syncBar + errorBar;
   const today=new Date();
   for(let offset=0;offset<7;offset++){
     const d=new Date(today); d.setDate(today.getDate()+offset);
     const events=getEventsForDate(d);
     const label=offset===0?"Today":offset===1?"Tomorrow":d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"});
     if (!events.length&&offset>1) continue;
-    html+=`<div class="table-group">
-      <div class="table-group-header">${label}</div>
-      <div class="table-card">${calRows(events,"cal_"+offset)}</div>
-    </div>`;
+    html+=`<div class="table-group"><div class="table-group-header">${label}</div><div class="table-card">${calRows(events,"cal_"+offset)}</div></div>`;
   }
   return html+'<div style="height:8px"></div>';
 }
