@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Clean">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Clean</title>
+<style>
+  :root {
+    --bg: #f5f2ed;
+    --surface: #ffffff;
+    --surface2: #f0ece5;
+    --text: #1a1a18;
+    --text2: #6b6860;
+    --text3: #9e9b94;
+    --accent: #2d6a4f;
+    --accent-light: #d8f3dc;
+    --accent-text: #1b4332;
+    --warn: #b5451b;
+    --warn-light: #fdebd0;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --surface: #1e1e1b;
+      --surface2: #262622;
+      --text: #f0ede6;
+      --text2: #9e9b8e;
+      --text3: #68665e;
+      --accent: #52b788;
+      --accent-light: #1b3a2a;
+      --accent-text: #a7e4bc;
+      --warn: #e07c4a;
+      --warn-light: #2d1a0e;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.13);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); font-family: -apple-system, 'Helvetica Neue', sans-serif; color: var(--text); overflow: hidden; }
+  
+  #app { height: 100%; display: flex; flex-direction: column; }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: calc(12px + var(--safe-top)) 20px 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .header-left {}
+  .header-date { font-size: 13px; color: var(--text3); font-weight: 400; margin-bottom: 2px; letter-spacing: 0.02em; }
+  .header-title { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border2);
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 17px; color: var(--text2); transition: all 0.15s;
+  }
+  .icon-btn:active { transform: scale(0.93); }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: var(--surface);
+    padding: 0 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-meta { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .progress-label { font-size: 13px; color: var(--text2); }
+  .progress-count { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .progress-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+
+  /* Nav tabs */
+  .nav-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 12px;
+    gap: 2px;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab.today { position: relative; }
+  .tab.today::after {
+    content: '';
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Scroll content */
+  .scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 16px calc(24px + var(--safe-bottom));
+  }
+
+  /* Day header */
+  .day-header-info {
+    margin-bottom: 14px;
+  }
+  .day-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .day-subtitle { font-size: 14px; color: var(--text2); }
+
+  /* Floor section */
+  .floor-section { margin-bottom: 18px; }
+  .floor-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3);
+    margin-bottom: 8px; padding: 0 4px;
+  }
+  .task-list { display: flex; flex-direction: column; gap: 2px; }
+
+  /* Task item */
+  .task-item {
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .task-item:active { transform: scale(0.98); }
+  .task-item.done { opacity: 0.5; }
+
+  .check-ring {
+    width: 24px; height: 24px; flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .task-item.done .check-ring {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .check-ring svg { display: none; }
+  .task-item.done .check-ring svg { display: block; }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .task-item.done .task-name { text-decoration: line-through; color: var(--text3); }
+  .task-detail { font-size: 13px; color: var(--text3); margin-top: 2px; }
+
+  .task-mins {
+    font-size: 12px; color: var(--text3); flex-shrink: 0;
+    background: var(--surface2); padding: 3px 8px; border-radius: 20px;
+  }
+
+  /* Time bar card */
+  .time-summary {
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .time-summary-left { }
+  .time-summary-label { font-size: 12px; color: var(--accent-text); opacity: 0.8; }
+  .time-summary-val { font-size: 20px; font-weight: 700; color: var(--accent-text); margin-top: 1px; }
+  .time-track { width: 100px; height: 8px; background: rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
+  .time-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
+  .time-fill.warn { background: var(--warn); }
+
+  /* Rest day */
+  .rest-day {
+    text-align: center; padding: 48px 24px; color: var(--text3);
+  }
+  .rest-day-icon { font-size: 52px; margin-bottom: 12px; }
+  .rest-day-title { font-size: 20px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+  .rest-day-sub { font-size: 15px; line-height: 1.5; }
+
+  /* All done */
+  .all-done { text-align: center; padding: 32px 24px 0; }
+  .all-done-icon { font-size: 44px; margin-bottom: 10px; }
+  .all-done-title { font-size: 18px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+  .all-done-sub { font-size: 14px; color: var(--text3); }
+
+  /* Settings panel */
+  .settings-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: flex-end;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .settings-sheet {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px calc(24px + var(--safe-bottom));
+    animation: slideUp 0.3s cubic-bezier(0.34,1.06,0.64,1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .sheet-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 20px; }
+  .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 16px; color: var(--text); }
+  .setting-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+  .setting-btn {
+    padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--border2); background: var(--surface2); color: var(--text);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .setting-btn:active { transform: scale(0.96); }
+  .setting-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .notif-status { font-size: 13px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .notif-status.on { background: var(--accent-light); color: var(--accent-text); }
+  .notif-status.off { background: var(--warn-light); color: var(--warn); }
+
+  select {
+    border: 1px solid var(--border2); background: var(--surface2);
+    color: var(--text); border-radius: var(--radius-sm); padding: 8px 12px;
+    font-size: 15px; font-family: inherit; outline: none;
+  }
+
+  .install-banner {
+    background: var(--accent-light);
+    margin: 12px 16px; border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .install-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+  .install-text { flex: 1; }
+  .install-title { font-size: 14px; font-weight: 600; color: var(--accent-text); }
+  .install-sub { font-size: 13px; color: var(--accent-text); opacity: 0.8; margin-top: 2px; line-height: 1.4; }
+  .install-close { font-size: 18px; color: var(--accent-text); opacity: 0.6; cursor: pointer; padding: 0 0 0 8px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <div class="header-date" id="hdrDate"></div>
+      <div class="header-title">Clean 🧹</div>
+    </div>
+    <div class="header-right">
+      <div class="icon-btn" onclick="openSettings()" title="Settings">⚙️</div>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap" id="progressWrap">
+    <div class="progress-meta">
+      <span class="progress-label">Today's progress</span>
+      <span class="progress-count" id="progressCount">0 / 0 tasks</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="nav-tabs" id="navTabs"></div>
+
+  <div id="installBanner"></div>
+
+  <div class="scroll-body" id="scrollBody"></div>
+</div>
+
+<div id="settingsPanel" style="display:none; position:absolute; inset:0; z-index:100;"></div>
+
+<script>
+const TASKS_DATA = [
+  { loc: "Paris loft", floor: 2, task: "Dust, vacuum & tidy", mins: 30, freq: "fortnightly" },
+  { loc: "Paris loft", floor: 2, task: "Clean velux windows", mins: 20, freq: "monthly" },
+  { loc: "Office", floor: 2, task: "Dust, vacuum & tidy", mins: 20, freq: "fortnightly" },
+  { loc: "Office", floor: 2, task: "Clean windows & blinds", mins: 15, freq: "monthly" },
+  { loc: "Master bedroom", floor: 1, task: "Change bedding (launder & refit same day)", mins: 20, freq: "weekly" },
+  { loc: "Master bedroom", floor: 1, task: "Dust, vacuum, tidy & clean mirrored wardrobe", mins: 30, freq: "weekly" },
+  { loc: "Master bedroom", floor: 1, task: "Clean windows inside & out + blinds", mins: 30, freq: "monthly" },
+  { loc: "Kids bedroom", floor: 1, task: "Dust, tidy & vacuum", mins: 20, freq: "weekly" },
+  { loc: "Kids bedroom", floor: 1, task: "Change bedding", mins: 20, freq: "weekly" },
+  { loc: "Kids bedroom", floor: 1, task: "Clean window & blinds", mins: 20, freq: "monthly" },
+  { loc: "Stairs", floor: -99, task: "Dust & vacuum all flights", mins: 15, freq: "weekly" },
+  { loc: "Guest bathroom", floor: 2, task: "Clean shower, toilet, floor, window & change towels", mins: 30, freq: "monthly" },
+  { loc: "Family bathroom", floor: 1, task: "Clean shower, bath, sink, toilet, mop + change towels & mats", mins: 45, freq: "weekly" },
+  { loc: "Family bathroom", floor: 1, task: "Clean window & blinds", mins: 10, freq: "monthly" },
+  { loc: "Entrance hall", floor: 0, task: "Vacuum & thin out coat rack", mins: 10, freq: "weekly" },
+  { loc: "Front room", floor: 0, task: "Dust, tidy & vacuum", mins: 20, freq: "twice-weekly" },
+  { loc: "Front room", floor: 0, task: "Clean windows & blinds", mins: 15, freq: "monthly" },
+  { loc: "Cloakroom", floor: 0, task: "Dust, tidy, vacuum, clean sink & toilet", mins: 15, freq: "weekly" },
+  { loc: "Kitchen", floor: 1, task: "Clean skylights (via bathroom window)", mins: 30, freq: "monthly" },
+  { loc: "Kitchen", floor: 0, task: "Clean surfaces, floor & general tidy", mins: 20, freq: "twice-weekly" },
+  { loc: "Kitchen", floor: 0, task: "Oven clean inside & out", mins: 60, freq: "quarterly" },
+  { loc: "Kitchen", floor: 0, task: "Fridge strip & clean inside", mins: 60, freq: "monthly", note: "Takes a full slot" },
+  { loc: "Kitchen", floor: 0, task: "Sort & clean pantry + shelving", mins: 60, freq: "monthly", note: "Do half today, half another day" },
+  { loc: "Garden", floor: 1, task: "Tidy & rake", mins: 60, freq: "weekly-summer" },
+  { loc: "Cellar", floor: -1, task: "Service washing machine & dryer", mins: 30, freq: "monthly" },
+  { loc: "Cellar", floor: -1, task: "Tidy the cellar", mins: 60, freq: "monthly" },
+  { loc: "Front yard", floor: 0, task: "Tidy & jetwash", mins: 60, freq: "quarterly" },
+];
+
+// Weekly schedule: [Mon=0 ... Sun=6]
+const WEEK_SCHEDULE = [
+  { label: "Ground floor", tasks: [14,15,17,19], desc: "Hall, front room, cloakroom & kitchen" },
+  { label: "Bedrooms", tasks: [4,5,7,8], desc: "Master & kids — bedding, vacuuming" },
+  { label: "Bathrooms & stairs", tasks: [12,10], desc: "Family bathroom + all stairways" },
+  { label: "Mid-week refresh", tasks: [15,19,14], desc: "Front room, kitchen & hall tops up" },
+  { label: "Light tidy", tasks: [17,7,19], desc: "Cloakroom, kids room & kitchen" },
+  { label: "Ground floor refresh", tasks: [15,19,10,14], desc: "Another pass before the weekend" },
+  { label: "Rest day", tasks: [], desc: "No tasks today — you've earned it" },
+];
+
+// Monthly rotating extras (one per week of month)
+const MONTHLY_EXTRAS = [
+  [0,2],     // week 1: loft + office vacuum
+  [6,9,13],  // week 2: window cleans
+  [1,3,11],  // week 3: velux, office windows, guest bath
+  [21,24,18],// week 4: fridge, WM service, skylights
+];
+
+const FLOOR_NAMES = { "-1": "Cellar", "0": "Ground floor", "1": "First floor", "2": "Second floor", "-99": "All floors" };
+
+// State
+let state = {
+  notifTime: localStorage.getItem('notifTime') || '08:00',
+  notifEnabled: localStorage.getItem('notifEnabled') === 'true',
+  checks: JSON.parse(localStorage.getItem('checks') || '{}'),
+  checksDate: localStorage.getItem('checksDate') || '',
+  activeTab: null,
+};
+
+function todayKey() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function getTodayDayIndex() {
+  const d = new Date().getDay();
+  return d === 0 ? 6 : d - 1; // Mon=0 ... Sun=6
+}
+
+function getWeekOfMonth() {
+  const d = new Date();
+  return Math.ceil(d.getDate() / 7) - 1; // 0-indexed
+}
+
+function resetChecksIfNewDay() {
+  const today = todayKey();
+  if (state.checksDate !== today) {
+    state.checks = {};
+    state.checksDate = today;
+    localStorage.setItem('checks', '{}');
+    localStorage.setItem('checksDate', today);
+  }
+}
+
+function getDayTasks(dayIdx) {
+  const base = WEEK_SCHEDULE[dayIdx].tasks;
+  const isToday = dayIdx === getTodayDayIndex();
+  let extra = [];
+  if (isToday) {
+    const weekNum = getWeekOfMonth();
+    extra = MONTHLY_EXTRAS[Math.min(weekNum, 3)];
+  }
+  // Merge, deduplicate
+  const all = [...new Set([...base, ...extra])];
+  return all.map(i => ({...TASKS_DATA[i], id: i}));
+}
+
+function groupByFloor(tasks) {
+  const groups = {};
+  tasks.forEach(t => {
+    const f = t.floor;
+    if (!groups[f]) groups[f] = [];
+    groups[f].push(t);
+  });
+  // Sort floors: -1, 0, 1, 2, -99 last
+  return Object.entries(groups).sort((a,b) => {
+    const fa = parseInt(a[0]), fb = parseInt(b[0]);
+    if (fa === -99) return 1;
+    if (fb === -99) return -1;
+    return fa - fb;
+  });
+}
+
+function saveChecks() {
+  localStorage.setItem('checks', JSON.stringify(state.checks));
+  localStorage.setItem('checksDate', state.checksDate);
+}
+
+function toggleTask(dayIdx, taskId) {
+  const key = `${dayIdx}-${taskId}`;
+  state.checks[key] = !state.checks[key];
+  saveChecks();
+  renderDay(dayIdx);
+  updateProgress(dayIdx);
+}
+
+function updateProgress(dayIdx) {
+  const tasks = getDayTasks(dayIdx);
+  const total = tasks.length;
+  if (!total) { document.getElementById('progressWrap').style.display='none'; return; }
+  const done = tasks.filter(t => state.checks[`${dayIdx}-${t.id}`]).length;
+  const pct = Math.round(done/total*100);
+  document.getElementById('progressCount').textContent = `${done} / ${total} tasks`;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressWrap').style.display = 'block';
+}
+
+function renderNav() {
+  const tabs = document.getElementById('navTabs');
+  const todayIdx = getTodayDayIndex();
+  const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  tabs.innerHTML = dayNames.map((d,i) => {
+    const active = state.activeTab === i ? ' active' : '';
+    const todayMark = i === todayIdx ? ' today' : '';
+    return `<div class="tab${active}${todayMark}" onclick="switchTab(${i})">${d}${i===todayIdx ? ' ·' : ''}</div>`;
+  }).join('');
+}
+
+function switchTab(dayIdx) {
+  state.activeTab = dayIdx;
+  renderNav();
+  renderDay(dayIdx);
+  updateProgress(dayIdx);
+  document.getElementById('scrollBody').scrollTop = 0;
+}
+
+function renderDay(dayIdx) {
+  const sched = WEEK_SCHEDULE[dayIdx];
+  const tasks = getDayTasks(dayIdx);
+  const body = document.getElementById('scrollBody');
+  const todayIdx = getTodayDayIndex();
+  const isToday = dayIdx === todayIdx;
+  const dayNames = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+  if (tasks.length === 0) {
+    body.innerHTML = `<div class="rest-day">
+      <div class="rest-day-icon">🌿</div>
+      <div class="rest-day-title">Rest day</div>
+      <div class="rest-day-sub">No tasks scheduled for ${dayNames[dayIdx]}.<br>Put your feet up.</div>
+    </div>`;
+    return;
+  }
+
+  const totalMins = tasks.reduce((s,t) => s+t.mins, 0);
+  const doneTasks = tasks.filter(t => state.checks[`${dayIdx}-${t.id}`]).length;
+  const pct = Math.min(100, Math.round(totalMins/60*100));
+  const allDone = doneTasks === tasks.length;
+  const timeLeft = tasks.filter(t => !state.checks[`${dayIdx}-${t.id}`]).reduce((s,t)=>s+t.mins,0);
+
+  const grouped = groupByFloor(tasks);
+
+  const floorSections = grouped.map(([floor, floorTasks]) => {
+    const rows = floorTasks.map(t => {
+      const key = `${dayIdx}-${t.id}`;
+      const done = state.checks[key] ? ' done' : '';
+      return `<div class="task-item${done}" onclick="toggleTask(${dayIdx},${t.id})">
+        <div class="check-ring">
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+            <path d="M1 5l3 3 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="task-body">
+          <div class="task-name">${t.task}</div>
+          <div class="task-detail">${t.loc}${t.note ? ' · ' + t.note : ''}</div>
+        </div>
+        <div class="task-mins">${t.mins}m</div>
+      </div>`;
+    }).join('');
+    return `<div class="floor-section">
+      <div class="floor-label">${FLOOR_NAMES[floor] || 'Other'}</div>
+      <div class="task-list">${rows}</div>
+    </div>`;
+  }).join('');
+
+  const allDoneBlock = allDone ? `<div class="all-done">
+    <div class="all-done-icon">✨</div>
+    <div class="all-done-title">All done!</div>
+    <div class="all-done-sub">House looking good. Come back tomorrow.</div>
+  </div>` : '';
+
+  const timeColor = pct > 100 ? 'warn' : '';
+  const timeText = isToday && !allDone ? `${timeLeft} min left` : `${totalMins} min total`;
+
+  body.innerHTML = `
+    <div class="day-header-info">
+      <div class="day-title">${isToday ? 'Today — ' : ''}${dayNames[dayIdx]}</div>
+      <div class="day-subtitle">${sched.desc}</div>
+    </div>
+    <div class="time-summary">
+      <div class="time-summary-left">
+        <div class="time-summary-label">Est. time</div>
+        <div class="time-summary-val">${timeText}</div>
+      </div>
+      <div class="time-track"><div class="time-fill ${timeColor}" style="width:${pct}%"></div></div>
+    </div>
+    ${floorSections}
+    ${allDoneBlock}
+  `;
+}
+
+// Header date
+function setHeaderDate() {
+  const d = new Date();
+  const opts = { weekday:'long', day:'numeric', month:'long' };
+  document.getElementById('hdrDate').textContent = d.toLocaleDateString('en-GB', opts);
+}
+
+// Install banner (iPad Safari)
+function checkInstallBanner() {
+  const dismissed = localStorage.getItem('installDismissed');
+  const isStandalone = window.navigator.standalone;
+  const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+  if (!dismissed && !isStandalone && isSafari) {
+    document.getElementById('installBanner').innerHTML = `
+      <div class="install-banner">
+        <div class="install-icon">📲</div>
+        <div class="install-text">
+          <div class="install-title">Add to Home Screen for daily alerts</div>
+          <div class="install-sub">Tap the share icon <strong>⎙</strong> then "Add to Home Screen" to get daily notifications.</div>
+        </div>
+        <div class="install-close" onclick="dismissInstall()">×</div>
+      </div>`;
+  }
+}
+
+function dismissInstall() {
+  localStorage.setItem('installDismissed','1');
+  document.getElementById('installBanner').innerHTML = '';
+}
+
+// Notifications
+async function requestNotifications() {
+  if (!('Notification' in window)) { alert('Notifications not supported in this browser.'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    state.notifEnabled = true;
+    localStorage.setItem('notifEnabled','true');
+    scheduleNotification();
+    renderSettings();
+    showToast('Daily reminders on ✓');
+  } else {
+    alert('Permission denied. Enable notifications for this site in Safari settings.');
+  }
+}
+
+function scheduleNotification() {
+  if (!state.notifEnabled) return;
+  clearScheduled();
+  const [h,m] = state.notifTime.split(':').map(Number);
+  const now = new Date();
+  const next = new Date();
+  next.setHours(h, m, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  const delay = next - now;
+  const tid = setTimeout(() => {
+    const dayIdx = getTodayDayIndex();
+    const tasks = getDayTasks(dayIdx);
+    const n = new Notification("🧹 Cleaning time!", {
+      body: `${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,
+      icon: 'icons/icon-192.png',
+      badge: 'icons/icon-192.png',
+    });
+    localStorage.setItem('notifTimer', '');
+    scheduleNotification(); // reschedule tomorrow
+  }, delay);
+  localStorage.setItem('notifTimer', String(delay));
+  window._notifTimer = tid;
+}
+
+function clearScheduled() {
+  if (window._notifTimer) clearTimeout(window._notifTimer);
+}
+
+function openSettings() {
+  renderSettings();
+  document.getElementById('settingsPanel').style.display = 'block';
+}
+
+function closeSettings() {
+  document.getElementById('settingsPanel').style.display = 'none';
+}
+
+function renderSettings() {
+  const granted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+  const panel = document.getElementById('settingsPanel');
+  panel.innerHTML = `<div class="settings-overlay" onclick="if(event.target===this)closeSettings()">
+    <div class="settings-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Settings</div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Daily notifications</div>
+          <div class="setting-sub">${granted ? 'Permission granted' : 'Tap to enable in Safari'}</div>
+        </div>
+        ${granted
+          ? `<span class="notif-status ${state.notifEnabled ? 'on':'off'}">${state.notifEnabled ? 'On':'Off'}</span>`
+          : `<button class="setting-btn primary" onclick="requestNotifications()">Enable</button>`
+        }
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Reminder time</div>
+          <div class="setting-sub">What time to send the alert</div>
+        </div>
+        <select id="notifTimeSel" onchange="saveNotifTime(this.value)">
+          ${['07:00','07:30','08:00','08:30','09:00','09:30','10:00'].map(t =>
+            `<option value="${t}" ${state.notifTime===t?'selected':''}>${t}</option>`
+          ).join('')}
+        </select>
+      </div>
+
+      ${granted && state.notifEnabled ? `<div class="setting-row">
+        <div>
+          <div class="setting-label">Test notification</div>
+          <div class="setting-sub">Send one right now</div>
+        </div>
+        <button class="setting-btn" onclick="testNotif()">Send test</button>
+      </div>` : ''}
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Reset today's checklist</div>
+          <div class="setting-sub">Uncheck all of today's tasks</div>
+        </div>
+        <button class="setting-btn" onclick="resetToday()">Reset</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveNotifTime(t) {
+  state.notifTime = t;
+  localStorage.setItem('notifTime', t);
+  scheduleNotification();
+}
+
+function testNotif() {
+  if (Notification.permission === 'granted') {
+    const dayIdx = getTodayDayIndex();
+    const tasks = getDayTasks(dayIdx);
+    new Notification("🧹 Cleaning time!", {
+      body: `${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,
+      icon: 'icons/icon-192.png',
+    });
+  }
+}
+
+function resetToday() {
+  const dayIdx = state.activeTab;
+  const tasks = getDayTasks(dayIdx);
+  tasks.forEach(t => { delete state.checks[`${dayIdx}-${t.id}`]; });
+  saveChecks();
+  renderDay(dayIdx);
+  updateProgress(dayIdx);
+  closeSettings();
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed', bottom:'90px', left:'50%', transform:'translateX(-50%)',
+    background:'var(--text)', color:'var(--bg)', padding:'10px 18px',
+    borderRadius:'20px', fontSize:'14px', fontWeight:'500', zIndex:'999',
+    animation:'fadeIn 0.2s ease',
+  });
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// Init
+resetChecksIfNewDay();
+setHeaderDate();
+state.activeTab = getTodayDayIndex();
+renderNav();
+renderDay(state.activeTab);
+updateProgress(state.activeTab);
+checkInstallBanner();
+if (state.notifEnabled && Notification.permission === 'granted') scheduleNotification();
+</script>
+</body>
+</html>
