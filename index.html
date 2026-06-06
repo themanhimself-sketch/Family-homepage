@@ -12,10 +12,10 @@
 /* ── iOS SYSTEM TOKENS ── */
 :root {
   --sys-bg:          #f2f2f7;
-  --sys-bg2:         #ffffff;
+  --sys-bg2:         rgba(255,255,255,0.92);
   --sys-bg3:         #f2f2f7;
   --sys-grouped-bg:  #f2f2f7;
-  --sys-fill:        rgba(120,120,128,0.12);
+  --sys-fill:        rgba(120,120,128,0.16);
   --sys-fill2:       rgba(120,120,128,0.08);
   --label:           #000000;
   --label2:          rgba(60,60,67,0.6);
@@ -29,9 +29,9 @@
   --red:             #ff3b30;
   --purple:          #af52de;
   --teal:            #5ac8fa;
-  --navbar-bg:       rgba(242,242,247,0.85);
-  --tabbar-bg:       rgba(249,249,249,0.94);
-  --card-bg:         rgba(255,255,255,0.82);
+  --navbar-bg:       rgba(242,242,247,0.55);
+  --tabbar-bg:       rgba(249,249,249,0.62);
+  --card-bg:         rgba(255,255,255,0.55);
   --safe-t:          env(safe-area-inset-top, 44px);
   --safe-b:          env(safe-area-inset-bottom, 0px);
   --font:            -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
@@ -40,7 +40,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --sys-bg:         #000000;
-    --sys-bg2:        #1c1c1e;
+    --sys-bg2:        rgba(28,28,30,0.92);
     --sys-bg3:        #2c2c2e;
     --sys-grouped-bg: #000000;
     --sys-fill:       rgba(120,120,128,0.36);
@@ -57,9 +57,9 @@
     --red:            #ff453a;
     --purple:         #bf5af2;
     --teal:           #64d2ff;
-    --navbar-bg:      rgba(28,28,30,0.85);
-    --tabbar-bg:      rgba(28,28,30,0.94);
-    --card-bg:        rgba(28,28,30,0.78);
+    --navbar-bg:      rgba(28,28,30,0.55);
+    --tabbar-bg:      rgba(28,28,30,0.62);
+    --card-bg:        rgba(28,28,30,0.50);
   }
 }
 
@@ -139,6 +139,18 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
   transition: background 2s ease;
   background: linear-gradient(180deg, #aac7e6 0%, #cfe0ef 100%);
 }
+/* readability scrim — keeps glass cards legible over bright skies */
+#weather-bg::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 30%, rgba(0,0,0,0.04) 100%);
+  pointer-events: none;
+}
+@media (prefers-color-scheme: dark) {
+  #weather-bg::after {
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.25) 100%);
+  }
+}
 #weather-bg .sky {
   position: absolute; inset: 0;
   transition: opacity 2.5s ease, background 2.5s ease;
@@ -205,6 +217,10 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
   color: var(--label);
   letter-spacing: -0.5px;
   line-height: 1.1;
+  text-shadow: 0 1px 3px rgba(255,255,255,0.25);
+}
+@media (prefers-color-scheme: dark) {
+  .large-title { text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 }
 .large-subtitle {
   font-size: 15px;
@@ -219,11 +235,16 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 }
 .table-group-header {
   font-size: 13px;
-  font-weight: 400;
-  color: var(--label2);
+  font-weight: 600;
+  color: var(--label);
+  opacity: 0.65;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 0 16px 6px;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+}
+@media (prefers-color-scheme: dark) {
+  .table-group-header { text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
 }
 .table-group-footer {
   font-size: 13px;
@@ -233,8 +254,12 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 }
 .table-card {
   background: var(--card-bg);
-  border-radius: 10px;
+  backdrop-filter: saturate(160%) blur(20px);
+  -webkit-backdrop-filter: saturate(160%) blur(20px);
+  border-radius: 12px;
   overflow: hidden;
+  border: 0.5px solid rgba(255,255,255,0.18);
+  box-shadow: 0 1px 12px rgba(0,0,0,0.06);
 }
 .table-row {
   display: flex;
@@ -342,8 +367,11 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 .day-pill {
   flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
   font-size: 14px; font-weight: 500;
-  background: var(--card-bg); color: var(--label2);
-  border: 0.5px solid var(--separator); cursor: pointer;
+  background: var(--card-bg);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  color: var(--label2);
+  border: 0.5px solid rgba(255,255,255,0.18); cursor: pointer;
   transition: all 0.15s;
 }
 .day-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
@@ -465,7 +493,7 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 .sheet-close:active { opacity: 0.5; }
 .sheet-group { margin: 20px 16px 0; }
 .sheet-group-hdr { font-size: 13px; color: var(--label2); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 4px 6px; }
-.sheet-card { background: var(--card-bg); border-radius: 10px; overflow: hidden; }
+.sheet-card { background: var(--card-bg); backdrop-filter: saturate(160%) blur(20px); -webkit-backdrop-filter: saturate(160%) blur(20px); border-radius: 12px; overflow: hidden; border: 0.5px solid rgba(255,255,255,0.18); }
 .sheet-row {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 16px; min-height: 44px; gap: 12px;
