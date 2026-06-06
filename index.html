@@ -398,6 +398,7 @@ const S = {
   notifTime: "08:00",
   notifEnabled: false,
   icalUrl: "",
+  calLastFetched: "",
   calEvents: [],
   calLoaded: false,
   weather: null,
@@ -413,6 +414,7 @@ function load() {
   S.notifTime  = ls("notifTime","08:00");
   S.notifEnabled = ls("notifEnabled","") === "true";
   S.icalUrl    = ls("icalUrl","");
+  S.calLastFetched = ls("calLastFetched","");
   S.weather    = JSON.parse(ls("weather","null"));
   S.weatherTs  = parseInt(ls("weatherTs","0"));
   S.activeDay  = todayDayIdx();
@@ -486,17 +488,25 @@ function renderWeather() {
 
 // ─── CALENDAR ────────────────────────────────────────────────────────────────
 
-async function fetchCal() {
+async function fetchCal(showToastMsg) {
   if (!S.icalUrl) return;
-  // Use a CORS proxy to fetch iCal
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(S.icalUrl.replace('webcal://','https://'))}`;
+  const icalUrl = S.icalUrl.replace('webcal://','https://');
+  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(icalUrl)}`;
   try {
     const r = await fetch(proxyUrl);
     const text = await r.text();
     S.calEvents = parseIcal(text);
     S.calLoaded = true;
-    if (S.tab === "today" || S.tab === "cleaning") render();
-  } catch(e) { S.calLoaded = true; }
+    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    S.calLastFetched = now;
+    localStorage.setItem('calLastFetched', now);
+    if (showToastMsg) showToast('Calendar refreshed ✓');
+    render();
+  } catch(e) {
+    S.calLoaded = true;
+    if (showToastMsg) showToast('Could not reach calendar — try again');
+    render();
+  }
 }
 
 function parseIcal(text) {
@@ -779,7 +789,16 @@ function renderCalendar() {
     <div class="cal-setup-btn" onclick="openSettings()" style="font-size:15px">Open Settings →</div>
   </div></div>`;
 
-  let html = "";
+  const syncLine = S.calLastFetched
+    ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 4px 12px;font-size:13px;color:var(--ink3)">
+        <span>Last synced ${S.calLastFetched}</span>
+        <span style="color:var(--blue);font-weight:600;cursor:pointer" onclick="fetchCal(true)">↻ Refresh</span>
+      </div>`
+    : `<div style="text-align:right;padding:4px 4px 12px">
+        <span style="font-size:13px;color:var(--blue);font-weight:600;cursor:pointer" onclick="fetchCal(true)">↻ Refresh calendar</span>
+      </div>`;
+
+  let html = syncLine;
   const today = new Date();
   for (let offset=0; offset<7; offset++) {
     const d = new Date(today);
@@ -956,7 +975,7 @@ function closeSettings() { document.getElementById("overlay").style.display="non
 function saveIcal() {
   const v = document.getElementById("icalInput")?.value.trim();
   S.icalUrl = v||""; localStorage.setItem("icalUrl",S.icalUrl);
-  closeSettings(); showToast("Calendar saved — loading…"); fetchCal();
+  closeSettings(); showToast('Calendar saved — loading…'); fetchCal(false);
 }
 function clearIcal() { S.icalUrl=""; S.calEvents=[]; localStorage.setItem("icalUrl",""); closeSettings(); render(); }
 
@@ -1023,7 +1042,7 @@ setDate();
 render();
 checkInstall();
 fetchWeather();
-if (S.icalUrl) fetchCal();
+if (S.icalUrl) fetchCal(false);
 if (S.notifEnabled && typeof Notification!=="undefined" && Notification.permission==="granted") scheduleNotif();
 </script>
 </body>
