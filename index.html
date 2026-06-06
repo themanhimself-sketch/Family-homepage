@@ -646,7 +646,8 @@ function renderWeather() {
 async function fetchCal(showToastMsg) {
   if (!S.icalUrl) return;
   const url = S.icalUrl.replace("webcal://","https://");
-  const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}&_=${Date.now()}`;
+  const cacheBustedUrl = url + (url.includes("?") ? "&" : "?") + "_=" + Date.now();
+  const proxy = `https://corsproxy.io/?${encodeURIComponent(cacheBustedUrl)}`;
   try {
     const r = await fetch(proxy);
     const text = await r.text();
@@ -739,18 +740,7 @@ function calGoogleLink(e) {
   // Try Google Calendar app deep link first, fallback to web
   return `googlecalendar://event?title=${title}&start=${start}&end=${end}`;
 }
-function openCalEvent(e) {
-  // Try app deep link; if it fails (app not installed), fall back to web search
-  const appUrl = calGoogleLink(e);
-  const webUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(e.summary)}`;
-  const iframe = document.createElement("iframe");
-  iframe.style.display = "none";
-  iframe.src = appUrl;
-  document.body.appendChild(iframe);
-  setTimeout(() => { iframe.remove(); }, 500);
-  // Also open web as fallback after short delay (app intercepts if installed)
-  setTimeout(() => { window.open(webUrl, "_blank"); }, 300);
-}
+// openCalEvent defined below
 // Store events in a lookup so onclick can reference by index safely
 window._calEventStore = {};
 function calRows(events, storeKey) {
@@ -915,7 +905,7 @@ function renderCalendar() {
     if (!events.length&&offset>1) continue;
     html+=`<div class="table-group">
       <div class="table-group-header">${label}</div>
-      <div class="table-card">${calRows(events)}</div>
+      <div class="table-card">${calRows(events,"cal_"+offset)}</div>
     </div>`;
   }
   return html+'<div style="height:8px"></div>';
