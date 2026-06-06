@@ -5,422 +5,572 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Daily Humans">
-<meta name="theme-color" content="#0f0f0d">
-
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<title>Daily Humans</title>
+<meta name="apple-mobile-web-app-title" content="Family">
+<meta name="theme-color" content="#f2f2f7">
+<title>Family Homepage</title>
 <style>
+/* ── iOS SYSTEM TOKENS ── */
 :root {
-  --bg: #f7f4ef;
-  --ink: #1a1916;
-  --ink2: #6b6860;
-  --ink3: #a8a59e;
-  --card: #ffffff;
-  --card2: #f0ece4;
-  --border: rgba(26,25,22,0.09);
-  --border2: rgba(26,25,22,0.16);
-  --green: #2d6a4f;
-  --green-bg: #e8f5ee;
-  --green-text: #1b4332;
-  --amber: #b45309;
-  --amber-bg: #fef3c7;
-  --blue: #1d4ed8;
-  --blue-bg: #eff6ff;
-  --red: #b91c1c;
-  --red-bg: #fef2f2;
-  --purple: #6d28d9;
-  --purple-bg: #f5f3ff;
-  --safe-t: env(safe-area-inset-top, 0px);
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --display: 'Playfair Display', Georgia, serif;
-  --body: 'DM Sans', sans-serif;
+  --sys-bg:          #f2f2f7;
+  --sys-bg2:         #ffffff;
+  --sys-bg3:         #f2f2f7;
+  --sys-grouped-bg:  #f2f2f7;
+  --sys-fill:        rgba(120,120,128,0.12);
+  --sys-fill2:       rgba(120,120,128,0.08);
+  --label:           #000000;
+  --label2:          rgba(60,60,67,0.6);
+  --label3:          rgba(60,60,67,0.3);
+  --label4:          rgba(60,60,67,0.18);
+  --separator:       rgba(60,60,67,0.29);
+  --sep-opaque:      #c6c6c8;
+  --blue:            #007aff;
+  --green:           #34c759;
+  --orange:          #ff9500;
+  --red:             #ff3b30;
+  --purple:          #af52de;
+  --teal:            #5ac8fa;
+  --navbar-bg:       rgba(242,242,247,0.85);
+  --tabbar-bg:       rgba(249,249,249,0.94);
+  --card-bg:         #ffffff;
+  --safe-t:          env(safe-area-inset-top, 44px);
+  --safe-b:          env(safe-area-inset-bottom, 0px);
+  --font:            -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --font-display:    -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f0f0d;
-    --ink: #f0ede4;
-    --ink2: #9e9b8e;
-    --ink3: #5a5850;
-    --card: #1a1916;
-    --card2: #222019;
-    --border: rgba(240,237,228,0.08);
-    --border2: rgba(240,237,228,0.15);
-    --green: #52b788;
-    --green-bg: #0d2b1e;
-    --green-text: #95d5b2;
-    --amber: #fbbf24;
-    --amber-bg: #1c1407;
-    --blue: #60a5fa;
-    --blue-bg: #0c1929;
-    --red: #f87171;
-    --red-bg: #1c0808;
-    --purple: #a78bfa;
-    --purple-bg: #150d2b;
+    --sys-bg:         #000000;
+    --sys-bg2:        #1c1c1e;
+    --sys-bg3:        #2c2c2e;
+    --sys-grouped-bg: #000000;
+    --sys-fill:       rgba(120,120,128,0.36);
+    --sys-fill2:      rgba(120,120,128,0.24);
+    --label:          #ffffff;
+    --label2:         rgba(235,235,245,0.6);
+    --label3:         rgba(235,235,245,0.3);
+    --label4:         rgba(235,235,245,0.18);
+    --separator:      rgba(84,84,88,0.65);
+    --sep-opaque:     #38383a;
+    --blue:           #0a84ff;
+    --green:          #30d158;
+    --orange:         #ff9f0a;
+    --red:            #ff453a;
+    --purple:         #bf5af2;
+    --teal:           #64d2ff;
+    --navbar-bg:      rgba(28,28,30,0.85);
+    --tabbar-bg:      rgba(28,28,30,0.94);
+    --card-bg:        #1c1c1e;
   }
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; background: var(--bg); font-family: var(--body); color: var(--ink); overflow: hidden; }
+html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(--font); color: var(--label); overflow: hidden; -webkit-font-smoothing: antialiased; }
 #app { height: 100%; display: flex; flex-direction: column; }
 
-/* ── HEADER ── */
-.hdr {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: calc(10px + var(--safe-t)) 18px 12px;
+/* ── NAVBAR ── */
+.navbar {
+  position: relative;
+  background: var(--navbar-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
+  padding-top: var(--safe-t);
+  z-index: 10;
+  flex-shrink: 0;
 }
-.hdr-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.hdr-title { font-family: var(--display); font-size: 28px; font-weight: 900; letter-spacing: -0.5px; line-height: 1; color: var(--ink); }
-.hdr-subtitle { font-size: 13px; color: var(--ink3); margin-top: 3px; font-weight: 400; }
-.hdr-right { display: flex; gap: 7px; }
-.hdr-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border2); background: var(--card2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: transform 0.15s; }
-.hdr-btn:active { transform: scale(0.92); }
+.navbar-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8px 16px 12px;
+  min-height: 44px;
+}
+.navbar-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.4px;
+}
+.navbar-date {
+  font-size: 13px;
+  color: var(--label2);
+  font-weight: 400;
+  margin-top: 1px;
+}
+.navbar-actions { display: flex; gap: 8px; align-items: center; padding-bottom: 2px; }
+.nav-action-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--sys-fill);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; cursor: pointer; border: none;
+  transition: opacity 0.15s;
+  color: var(--blue);
+}
+.nav-action-btn:active { opacity: 0.5; }
 
-/* weather strip */
-.weather-strip {
-  display: flex; align-items: center; gap: 10px;
-  margin-top: 10px; padding: 8px 12px;
-  background: var(--card2); border-radius: 10px;
-  border: 1px solid var(--border);
+/* weather bar */
+.weather-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 16px 10px;
+  border-top: 0.5px solid var(--separator);
 }
-.wx-icon { font-size: 22px; line-height: 1; }
-.wx-temp { font-size: 18px; font-weight: 600; color: var(--ink); }
-.wx-desc { font-size: 13px; color: var(--ink2); }
-.wx-details { margin-left: auto; text-align: right; }
-.wx-detail-row { font-size: 12px; color: var(--ink3); }
-.wx-loading { font-size: 13px; color: var(--ink3); }
-
-/* ── NAV ── */
-.nav {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  display: flex; overflow-x: auto; scrollbar-width: none;
-  -webkit-overflow-scrolling: touch; padding: 0 10px; gap: 0;
-}
-.nav::-webkit-scrollbar { display: none; }
-.nav-tab {
-  padding: 10px 14px; font-size: 13px; font-weight: 500;
-  color: var(--ink3); cursor: pointer; white-space: nowrap;
-  border-bottom: 2px solid transparent; transition: all 0.15s;
-  flex-shrink: 0; display: flex; align-items: center; gap: 5px;
-}
-.nav-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
-.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.wx-icon { font-size: 18px; line-height: 1; }
+.wx-temp { font-size: 15px; font-weight: 600; color: var(--label); }
+.wx-desc { font-size: 14px; color: var(--label2); margin-left: 4px; }
+.wx-right { margin-left: auto; display: flex; gap: 12px; }
+.wx-stat { font-size: 13px; color: var(--label2); }
 
 /* ── SCROLL BODY ── */
-.body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 14px calc(20px + var(--safe-b)); }
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--sys-grouped-bg);
+  padding-bottom: calc(84px + var(--safe-b));
+}
 
-/* ── CARDS ── */
-.section-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; margin-bottom: 12px; overflow: hidden;
+/* large title section */
+.large-title-section {
+  padding: 20px 20px 4px;
 }
-.section-head {
-  padding: 12px 14px; display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--border);
+.large-title {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--label);
+  letter-spacing: -0.5px;
+  line-height: 1.1;
 }
-.section-head-left { display: flex; align-items: center; gap: 8px; }
-.section-icon { font-size: 16px; }
-.section-title { font-size: 14px; font-weight: 600; color: var(--ink); }
-.section-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-.badge-green { background: var(--green-bg); color: var(--green-text); }
-.badge-amber { background: var(--amber-bg); color: var(--amber); }
-.badge-blue { background: var(--blue-bg); color: var(--blue); }
-.badge-red { background: var(--red-bg); color: var(--red); }
-.badge-purple { background: var(--purple-bg); color: var(--purple); }
-.section-body { padding: 4px 0; }
+.large-subtitle {
+  font-size: 15px;
+  color: var(--label2);
+  margin-top: 4px;
+  font-weight: 400;
+}
 
-/* ── CALENDAR EVENTS ── */
-.cal-event {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 14px; border-bottom: 1px solid var(--border);
+/* ── GROUPED TABLE (iOS Settings style) ── */
+.table-group {
+  margin: 20px 16px 0;
 }
-.cal-event:last-child { border-bottom: none; }
-.cal-dot-wrap { padding-top: 4px; }
-.cal-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.cal-body { flex: 1; }
-.cal-title { font-size: 14px; font-weight: 500; color: var(--ink); line-height: 1.3; }
-.cal-meta { font-size: 12px; color: var(--ink3); margin-top: 2px; }
-.cal-time { font-size: 12px; color: var(--ink2); flex-shrink: 0; font-weight: 500; }
-.cal-empty { padding: 16px 14px; font-size: 14px; color: var(--ink3); text-align: center; }
-.cal-setup { padding: 14px; text-align: center; }
-.cal-setup-text { font-size: 13px; color: var(--ink2); margin-bottom: 10px; line-height: 1.5; }
-.cal-setup-btn { font-size: 13px; font-weight: 600; color: var(--blue); cursor: pointer; }
+.table-group-header {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--label2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 16px 6px;
+}
+.table-group-footer {
+  font-size: 13px;
+  color: var(--label2);
+  padding: 6px 16px 0;
+  line-height: 1.4;
+}
+.table-card {
+  background: var(--card-bg);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.table-row {
+  display: flex;
+  align-items: center;
+  padding: 11px 16px;
+  min-height: 44px;
+  gap: 12px;
+  position: relative;
+  cursor: pointer;
+}
+.table-row:active { background: var(--sys-fill2); }
+.table-row + .table-row::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 56px; right: 0;
+  height: 0.5px;
+  background: var(--separator);
+}
+.table-row.no-indent + .table-row::before,
+.table-row + .table-row.no-indent::before { left: 16px; }
 
-/* ── TASK ITEMS ── */
-.task-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 14px; border-bottom: 1px solid var(--border);
-  cursor: pointer; transition: background 0.1s;
-}
-.task-item:last-child { border-bottom: none; }
-.task-item:active { background: var(--card2); }
-.task-item.done { opacity: 0.45; }
-.chk {
-  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
-  border: 2px solid var(--border2);
+/* row icon */
+.row-icon {
+  width: 30px; height: 30px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  font-size: 16px; flex-shrink: 0;
 }
-.task-item.done .chk { background: var(--green); border-color: var(--green); }
-.chk-tick { display: none; color: white; font-size: 11px; font-weight: 700; }
-.task-item.done .chk-tick { display: block; }
-.task-body2 { flex: 1; min-width: 0; }
-.task-name { font-size: 14px; font-weight: 500; color: var(--ink); }
-.task-item.done .task-name { text-decoration: line-through; color: var(--ink3); }
-.task-loc { font-size: 12px; color: var(--ink3); margin-top: 1px; }
-.task-mins-pill { font-size: 11px; color: var(--ink3); background: var(--card2); padding: 2px 7px; border-radius: 20px; flex-shrink: 0; }
+.row-icon.blue   { background: var(--blue); }
+.row-icon.green  { background: var(--green); }
+.row-icon.orange { background: var(--orange); }
+.row-icon.red    { background: var(--red); }
+.row-icon.purple { background: var(--purple); }
+.row-icon.teal   { background: var(--teal); }
+.row-icon.gray   { background: var(--sys-fill); }
 
-/* floor group label */
-.floor-grp { padding: 8px 14px 4px; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink3); border-bottom: 1px solid var(--border); }
+.row-body { flex: 1; min-width: 0; }
+.row-label { font-size: 17px; color: var(--label); font-weight: 400; }
+.row-sublabel { font-size: 13px; color: var(--label2); margin-top: 1px; }
 
-/* time bar */
-.time-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
-.time-track { flex: 1; height: 5px; background: var(--card2); border-radius: 3px; overflow: hidden; }
-.time-fill { height: 100%; border-radius: 3px; background: var(--green); transition: width 0.4s; }
-.time-fill.over { background: var(--red); }
-.time-label { font-size: 12px; color: var(--ink2); white-space: nowrap; font-weight: 500; }
+.row-detail { font-size: 17px; color: var(--label2); flex-shrink: 0; }
+.row-chevron { font-size: 14px; color: var(--label3); flex-shrink: 0; margin-left: 4px; }
 
-/* ── BIN DAY ── */
-.bin-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
-.bin-icon { font-size: 28px; }
-.bin-body { flex: 1; }
-.bin-title { font-size: 14px; font-weight: 600; color: var(--ink); }
-.bin-sub { font-size: 13px; color: var(--ink2); margin-top: 2px; }
-.bin-days { font-size: 12px; color: var(--ink3); margin-top: 2px; }
-
-/* ── NOTES ── */
-.notes-area {
-  width: 100%; padding: 12px 14px; font-family: var(--body);
-  font-size: 14px; color: var(--ink); background: transparent;
-  border: none; resize: none; outline: none; min-height: 100px;
-  line-height: 1.6;
+/* checkmark row */
+.row-check {
+  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--sep-opaque);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
 }
-.notes-area::placeholder { color: var(--ink3); }
-.notes-footer { padding: 6px 14px 10px; display: flex; justify-content: space-between; align-items: center; }
-.notes-saved { font-size: 12px; color: var(--ink3); }
-.notes-clear { font-size: 12px; color: var(--red); cursor: pointer; }
+.table-row.checked .row-check {
+  background: var(--green);
+  border-color: var(--green);
+}
+.row-check-tick { display: none; color: #fff; font-size: 12px; font-weight: 700; }
+.table-row.checked .row-check-tick { display: block; }
+.table-row.checked .row-label { color: var(--label3); text-decoration: line-through; }
 
-/* todo list */
-.todo-input-row { display: flex; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+/* time progress */
+.progress-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px 10px;
+}
+.progress-track { flex: 1; height: 4px; background: var(--sys-fill); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; background: var(--blue); transition: width 0.4s; }
+.progress-fill.done { background: var(--green); }
+.progress-fill.over { background: var(--red); }
+.progress-label { font-size: 13px; color: var(--label2); white-space: nowrap; }
+
+/* calendar event row */
+.cal-row {
+  display: flex; align-items: center; padding: 11px 16px; gap: 12px; min-height: 44px;
+}
+.cal-row + .cal-row { border-top: 0.5px solid var(--separator); }
+.cal-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cal-title { font-size: 17px; color: var(--label); flex: 1; }
+.cal-time { font-size: 15px; color: var(--label2); }
+.cal-empty { padding: 14px 16px; font-size: 17px; color: var(--label3); text-align: center; }
+
+/* badge / pill */
+.badge {
+  font-size: 12px; font-weight: 600; padding: 2px 8px;
+  border-radius: 10px; flex-shrink: 0; white-space: nowrap;
+}
+.badge-blue   { background: rgba(0,122,255,0.12); color: var(--blue); }
+.badge-green  { background: rgba(52,199,89,0.12); color: var(--green); }
+.badge-orange { background: rgba(255,149,0,0.12); color: var(--orange); }
+.badge-red    { background: rgba(255,59,48,0.12); color: var(--red); }
+.badge-purple { background: rgba(175,82,222,0.12); color: var(--purple); }
+
+/* section header inside card (floor label etc) */
+.inset-header {
+  font-size: 13px; font-weight: 600; color: var(--label2);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  padding: 8px 16px 2px;
+  border-top: 0.5px solid var(--separator);
+}
+.inset-header:first-child { border-top: none; }
+
+/* day pill row */
+.day-pills {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch; padding: 16px 16px 0;
+}
+.day-pills::-webkit-scrollbar { display: none; }
+.day-pill {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 14px; font-weight: 500;
+  background: var(--card-bg); color: var(--label2);
+  border: 0.5px solid var(--separator); cursor: pointer;
+  transition: all 0.15s;
+}
+.day-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.day-pill.is-today:not(.active) { border-color: var(--blue); color: var(--blue); }
+
+/* rest day */
+.rest-day { padding: 32px 16px; text-align: center; }
+.rest-emoji { font-size: 44px; margin-bottom: 10px; }
+.rest-title { font-size: 20px; font-weight: 600; color: var(--label); margin-bottom: 4px; }
+.rest-sub { font-size: 15px; color: var(--label2); }
+
+/* all done */
+.all-done-banner {
+  margin: 0 16px 0; background: rgba(52,199,89,0.12);
+  border-radius: 10px; padding: 12px 16px; text-align: center;
+}
+.all-done-title { font-size: 15px; font-weight: 600; color: var(--green); }
+
+/* to-do input */
+.todo-input-row {
+  display: flex; gap: 8px; padding: 10px 16px;
+  border-bottom: 0.5px solid var(--separator);
+}
 .todo-input {
-  flex: 1; background: var(--card2); border: 1px solid var(--border2);
-  border-radius: 8px; padding: 8px 12px; font-family: var(--body);
-  font-size: 14px; color: var(--ink); outline: none;
+  flex: 1; background: var(--sys-fill); border: none; border-radius: 8px;
+  padding: 8px 12px; font-family: var(--font); font-size: 17px; color: var(--label);
+  outline: none;
 }
-.todo-input::placeholder { color: var(--ink3); }
+.todo-input::placeholder { color: var(--label3); }
 .todo-add-btn {
-  background: var(--ink); color: var(--bg); border: none;
-  border-radius: 8px; padding: 8px 14px; font-size: 14px; font-weight: 600;
-  cursor: pointer; font-family: var(--body); flex-shrink: 0;
+  background: none; border: none; font-size: 17px; font-weight: 600;
+  color: var(--blue); cursor: pointer; font-family: var(--font); padding: 8px 4px;
 }
-.todo-add-btn:active { opacity: 0.8; }
-.todo-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
-.todo-item:last-child { border-bottom: none; }
-.todo-item.done { opacity: 0.4; }
-.todo-text { flex: 1; font-size: 14px; color: var(--ink); }
-.todo-item.done .todo-text { text-decoration: line-through; color: var(--ink3); }
-.todo-del { font-size: 16px; color: var(--ink3); padding: 0 4px; }
+.todo-add-btn:active { opacity: 0.5; }
+.row-del { font-size: 22px; color: var(--red); padding: 0 4px; line-height: 1; }
+
+/* notes */
+.notes-textarea {
+  width: 100%; background: transparent; border: none; outline: none;
+  font-family: var(--font); font-size: 17px; color: var(--label);
+  padding: 12px 16px; resize: none; min-height: 200px; line-height: 1.6;
+  display: block;
+}
+.notes-textarea::placeholder { color: var(--label3); }
+.notes-footer { padding: 4px 16px 12px; display: flex; justify-content: space-between; }
+.notes-saved { font-size: 13px; color: var(--label3); }
+.notes-clear { font-size: 15px; color: var(--red); cursor: pointer; }
+
+/* bin */
+.bin-content { display: flex; align-items: center; gap: 12px; padding: 12px 16px 14px; }
+.bin-emoji { font-size: 32px; }
+.bin-body .row-label { font-size: 17px; font-weight: 500; }
+.bin-body .row-sublabel { font-size: 14px; margin-top: 3px; }
+
+/* setup prompt */
+.setup-cell { padding: 16px; text-align: center; }
+.setup-text { font-size: 15px; color: var(--label2); margin-bottom: 12px; line-height: 1.5; }
+.setup-link { font-size: 17px; font-weight: 500; color: var(--blue); cursor: pointer; }
+
+/* ── BOTTOM TAB BAR ── */
+.tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: calc(49px + var(--safe-b));
+  background: var(--tabbar-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid var(--separator);
+  display: flex;
+  align-items: stretch;
+  z-index: 20;
+  padding-bottom: var(--safe-b);
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; cursor: pointer;
+  padding: 4px 0 2px; transition: opacity 0.1s;
+}
+.tab-item:active { opacity: 0.7; }
+.tab-icon { font-size: 22px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 500; color: var(--label3); letter-spacing: 0.01em; }
+.tab-item.active .tab-label { color: var(--blue); }
+.tab-item.active .tab-icon { filter: none; }
+
+/* sync row */
+.sync-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 16px 8px;
+}
+.sync-label { font-size: 13px; color: var(--label3); }
+.sync-btn { font-size: 15px; font-weight: 500; color: var(--blue); cursor: pointer; }
+.sync-btn:active { opacity: 0.5; }
 
 /* ── SETTINGS SHEET ── */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; animation: fadeIn 0.2s; }
-@keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
-.sheet {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: var(--card); border-radius: 20px 20px 0 0;
-  padding: 16px 18px calc(20px + var(--safe-b));
-  max-height: 85vh; overflow-y: auto;
-  animation: slideUp 0.3s cubic-bezier(0.34,1.06,0.64,1);
+.sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 100; display: flex; align-items: flex-end;
+  animation: fadeIn 0.2s ease;
 }
-@keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
-.sheet-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 16px; }
-.sheet-title { font-family: var(--display); font-size: 20px; font-weight: 700; margin-bottom: 16px; }
-.setting-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); gap: 12px; }
-.setting-row:last-child { border-bottom: none; }
-.setting-label { font-size: 15px; font-weight: 500; color: var(--ink); }
-.setting-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
-.s-btn { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid var(--border2); background: var(--card2); color: var(--ink); cursor: pointer; font-family: var(--body); white-space: nowrap; }
-.s-btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.s-btn:active { opacity: 0.8; }
-.s-input { width: 100%; background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 12px; font-family: var(--body); font-size: 13px; color: var(--ink); outline: none; margin-top: 6px; }
-.s-select { background: var(--card2); border: 1px solid var(--border2); border-radius: 8px; padding: 7px 10px; font-family: var(--body); font-size: 14px; color: var(--ink); outline: none; }
-.setting-col { flex: 1; }
+@keyframes fadeIn { from {opacity:0} to {opacity:1} }
+.sheet {
+  width: 100%; background: var(--sys-bg2);
+  border-radius: 12px 12px 0 0;
+  padding: 0 0 calc(20px + var(--safe-b));
+  max-height: 90vh; overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes slideUp { from {transform:translateY(100%)} to {transform:translateY(0)} }
+.sheet-handle {
+  width: 36px; height: 4px; background: var(--sep-opaque);
+  border-radius: 2px; margin: 8px auto 4px;
+}
+.sheet-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 20px 4px;
+}
+.sheet-title { font-size: 17px; font-weight: 600; color: var(--label); }
+.sheet-close { font-size: 17px; font-weight: 500; color: var(--blue); cursor: pointer; }
+.sheet-close:active { opacity: 0.5; }
+.sheet-group { margin: 20px 16px 0; }
+.sheet-group-hdr { font-size: 13px; color: var(--label2); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 4px 6px; }
+.sheet-card { background: var(--card-bg); border-radius: 10px; overflow: hidden; }
+.sheet-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; min-height: 44px; gap: 12px;
+}
+.sheet-row + .sheet-row { border-top: 0.5px solid var(--separator); }
+.sheet-row-label { font-size: 17px; color: var(--label); }
+.sheet-row-sub { font-size: 13px; color: var(--label2); margin-top: 2px; }
+.s-btn {
+  font-size: 15px; font-weight: 500; color: var(--blue);
+  background: none; border: none; cursor: pointer; font-family: var(--font);
+  padding: 4px 0; white-space: nowrap;
+}
+.s-btn:active { opacity: 0.5; }
+.s-btn.destructive { color: var(--red); }
+.s-select {
+  background: var(--sys-fill); border: none; border-radius: 8px;
+  padding: 6px 10px; font-family: var(--font); font-size: 15px;
+  color: var(--label); outline: none;
+}
+.s-input-block {
+  padding: 4px 16px 12px;
+}
+.s-input {
+  width: 100%; background: var(--sys-fill); border: none; border-radius: 8px;
+  padding: 10px 12px; font-family: var(--font); font-size: 15px; color: var(--label);
+  outline: none; margin-top: 6px;
+}
+.s-input::placeholder { color: var(--label3); }
+.s-save-btn {
+  width: calc(100% - 32px); margin: 8px 16px 0;
+  background: var(--blue); color: #fff; border: none; border-radius: 10px;
+  padding: 14px; font-size: 17px; font-weight: 600; font-family: var(--font);
+  cursor: pointer;
+}
+.s-save-btn:active { opacity: 0.85; }
+.status-pill {
+  font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+}
+.status-on { background: rgba(52,199,89,0.12); color: var(--green); }
+.status-off { background: rgba(255,59,48,0.12); color: var(--red); }
 
-/* toast */
+/* ── TOAST ── */
 .toast {
-  position: fixed; bottom: calc(80px + var(--safe-b)); left: 50%; transform: translateX(-50%);
-  background: var(--ink); color: var(--bg); padding: 9px 18px; border-radius: 20px;
-  font-size: 13px; font-weight: 500; z-index: 300; animation: fadeIn 0.2s;
-  white-space: nowrap;
+  position: fixed; bottom: calc(64px + var(--safe-b)); left: 50%; transform: translateX(-50%);
+  background: rgba(50,50,52,0.95); color: #fff;
+  padding: 9px 18px; border-radius: 20px; font-size: 14px; font-weight: 500;
+  z-index: 200; white-space: nowrap; animation: fadeIn 0.2s;
 }
 
 /* install banner */
 .install-banner {
-  background: var(--amber-bg); border: 1px solid rgba(180,83,9,0.2);
-  margin: 10px 14px 0; border-radius: 10px; padding: 10px 12px;
-  display: flex; gap: 8px; align-items: flex-start;
+  margin: 12px 16px 0; background: rgba(0,122,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  display: flex; gap: 10px; align-items: flex-start;
 }
-.install-banner-text { flex: 1; font-size: 13px; color: var(--amber); line-height: 1.4; }
-.install-banner-close { font-size: 18px; color: var(--amber); opacity: 0.6; cursor: pointer; padding: 0 2px; }
-
-/* rest day */
-.rest-day { text-align: center; padding: 40px 24px; }
-.rest-day-emoji { font-size: 48px; margin-bottom: 10px; }
-.rest-day-title { font-family: var(--display); font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
-.rest-day-sub { font-size: 14px; color: var(--ink3); }
-
-/* all done */
-.all-done-strip { background: var(--green-bg); border-radius: 10px; margin: 10px 14px; padding: 12px; text-align: center; }
-.all-done-strip-title { font-size: 14px; font-weight: 600; color: var(--green-text); }
-.all-done-strip-sub { font-size: 12px; color: var(--green-text); opacity: 0.8; margin-top: 2px; }
-
-/* day selector */
-.day-selector { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 0 0 2px; margin-bottom: 14px; }
-.day-selector::-webkit-scrollbar { display: none; }
-.day-pill {
-  flex-shrink: 0; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
-  border: 1px solid var(--border2); background: var(--card); color: var(--ink2); cursor: pointer;
-  transition: all 0.15s;
-}
-.day-pill.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-.day-pill.today-pill { border-color: var(--green); }
+.install-text { flex: 1; font-size: 14px; color: var(--blue); line-height: 1.4; }
+.install-close { font-size: 20px; color: var(--label3); cursor: pointer; }
 </style>
 </head>
 <body>
 <div id="app">
-  <div class="hdr">
-    <div class="hdr-top">
+  <div class="navbar">
+    <div class="navbar-inner">
       <div>
-        <div class="hdr-title">Daily Humans</div>
-        <div class="hdr-subtitle" id="hdrDate">Loading...</div>
+        <div class="navbar-title" id="navTitle">Family Homepage</div>
+        <div class="navbar-date" id="navDate"></div>
       </div>
-      <div class="hdr-right">
-        <div class="hdr-btn" onclick="refreshWeather()" title="Refresh weather">🌤</div>
-        <div class="hdr-btn" onclick="openSettings()" title="Settings">⚙️</div>
+      <div class="navbar-actions">
+        <button class="nav-action-btn" onclick="refreshWeather()" title="Refresh weather">↻</button>
+        <button class="nav-action-btn" onclick="openSettings()" title="Settings">⚙</button>
       </div>
     </div>
-    <div class="weather-strip" id="weatherStrip">
-      <span class="wx-loading">Fetching weather for Leyton…</span>
+    <div class="weather-bar" id="weatherBar">
+      <span class="wx-stat" style="color:var(--label3)">Loading weather…</span>
     </div>
   </div>
-  <div id="installBanner"></div>
-  <div class="nav" id="nav"></div>
-  <div class="body" id="body"></div>
+
+  <div class="scroll-body" id="scrollBody">
+    <div id="installBanner"></div>
+    <div id="pageContent"></div>
+  </div>
+
+  <div class="tab-bar" id="tabBar"></div>
 </div>
-<div id="overlay" style="display:none"></div>
+<div id="sheetContainer"></div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-
+// ─── TASK DATA ───────────────────────────────────────────────────────────────
 const TASKS = [
-  { loc:"Paris loft",    floor:2,   task:"Dust, vacuum & tidy",                          mins:30, freq:"fortnightly" },
-  { loc:"Paris loft",    floor:2,   task:"Clean velux windows",                          mins:20, freq:"monthly" },
-  { loc:"Office",        floor:2,   task:"Dust, vacuum & tidy",                          mins:20, freq:"fortnightly" },
-  { loc:"Office",        floor:2,   task:"Clean windows & blinds",                       mins:15, freq:"monthly" },
-  { loc:"Master bedroom",floor:1,   task:"Change bedding (launder & refit same day)",    mins:20, freq:"weekly" },
-  { loc:"Master bedroom",floor:1,   task:"Dust, vacuum, tidy & clean mirrored wardrobe", mins:30, freq:"weekly" },
-  { loc:"Master bedroom",floor:1,   task:"Clean windows inside & out + blinds",          mins:30, freq:"monthly" },
-  { loc:"Kids bedroom",  floor:1,   task:"Dust, tidy & vacuum",                          mins:20, freq:"weekly" },
-  { loc:"Kids bedroom",  floor:1,   task:"Change bedding",                               mins:20, freq:"weekly" },
-  { loc:"Kids bedroom",  floor:1,   task:"Clean window & blinds",                        mins:20, freq:"monthly" },
-  { loc:"Stairs",        floor:-99, task:"Dust & vacuum all flights",                    mins:15, freq:"weekly" },
-  { loc:"Guest bathroom",floor:2,   task:"Clean shower, toilet, floor, window + towels", mins:30, freq:"monthly" },
-  { loc:"Family bathroom",floor:1,  task:"Clean shower, bath, sink, toilet, mop + towels",mins:45,freq:"weekly" },
-  { loc:"Family bathroom",floor:1,  task:"Clean window & blinds",                        mins:10, freq:"monthly" },
-  { loc:"Entrance hall", floor:0,   task:"Vacuum & thin out coat rack",                  mins:10, freq:"weekly" },
-  { loc:"Front room",    floor:0,   task:"Dust, tidy & vacuum",                          mins:20, freq:"twice-weekly" },
-  { loc:"Front room",    floor:0,   task:"Clean windows & blinds",                       mins:15, freq:"monthly" },
-  { loc:"Cloakroom",     floor:0,   task:"Dust, tidy, vacuum, clean sink & toilet",      mins:15, freq:"weekly" },
-  { loc:"Kitchen",       floor:1,   task:"Clean skylights (via bathroom window)",        mins:30, freq:"monthly" },
-  { loc:"Kitchen",       floor:0,   task:"Clean surfaces, floor & general tidy",         mins:20, freq:"twice-weekly" },
-  { loc:"Kitchen",       floor:0,   task:"Oven clean inside & out",                      mins:60, freq:"quarterly", note:"Block a morning" },
-  { loc:"Kitchen",       floor:0,   task:"Fridge strip & clean inside",                  mins:60, freq:"monthly",   note:"Takes a full slot" },
-  { loc:"Kitchen",       floor:0,   task:"Sort & clean pantry + shelving",               mins:60, freq:"monthly",   note:"Do half, come back" },
-  { loc:"Garden",        floor:1,   task:"Tidy & rake",                                  mins:60, freq:"weekly-summer" },
-  { loc:"Cellar",        floor:-1,  task:"Service washing machine & dryer",              mins:30, freq:"monthly" },
-  { loc:"Cellar",        floor:-1,  task:"Tidy the cellar",                              mins:60, freq:"monthly" },
-  { loc:"Front yard",    floor:0,   task:"Tidy & jetwash",                               mins:60, freq:"quarterly", note:"Block a morning" },
+  { loc:"Paris loft",     floor:2,   task:"Dust, vacuum & tidy",                           mins:30, freq:"fortnightly" },
+  { loc:"Paris loft",     floor:2,   task:"Clean velux windows",                           mins:20, freq:"monthly" },
+  { loc:"Office",         floor:2,   task:"Dust, vacuum & tidy",                           mins:20, freq:"fortnightly" },
+  { loc:"Office",         floor:2,   task:"Clean windows & blinds",                        mins:15, freq:"monthly" },
+  { loc:"Master bedroom", floor:1,   task:"Change bedding (launder & refit same day)",     mins:20, freq:"weekly" },
+  { loc:"Master bedroom", floor:1,   task:"Dust, vacuum, tidy & clean mirrored wardrobe",  mins:30, freq:"weekly" },
+  { loc:"Master bedroom", floor:1,   task:"Clean windows inside & out + blinds",           mins:30, freq:"monthly" },
+  { loc:"Kids bedroom",   floor:1,   task:"Dust, tidy & vacuum",                           mins:20, freq:"weekly" },
+  { loc:"Kids bedroom",   floor:1,   task:"Change bedding",                                mins:20, freq:"weekly" },
+  { loc:"Kids bedroom",   floor:1,   task:"Clean window & blinds",                         mins:20, freq:"monthly" },
+  { loc:"Stairs",         floor:-99, task:"Dust & vacuum all flights",                     mins:15, freq:"weekly" },
+  { loc:"Guest bathroom", floor:2,   task:"Clean shower, toilet, floor, window + towels",  mins:30, freq:"monthly" },
+  { loc:"Family bathroom",floor:1,   task:"Clean shower, bath, sink, toilet, mop + towels",mins:45, freq:"weekly" },
+  { loc:"Family bathroom",floor:1,   task:"Clean window & blinds",                         mins:10, freq:"monthly" },
+  { loc:"Entrance hall",  floor:0,   task:"Vacuum & thin out coat rack",                   mins:10, freq:"weekly" },
+  { loc:"Front room",     floor:0,   task:"Dust, tidy & vacuum",                           mins:20, freq:"twice-weekly" },
+  { loc:"Front room",     floor:0,   task:"Clean windows & blinds",                        mins:15, freq:"monthly" },
+  { loc:"Cloakroom",      floor:0,   task:"Dust, tidy, vacuum, clean sink & toilet",       mins:15, freq:"weekly" },
+  { loc:"Kitchen",        floor:1,   task:"Clean skylights (via bathroom window)",         mins:30, freq:"monthly" },
+  { loc:"Kitchen",        floor:0,   task:"Clean surfaces, floor & general tidy",          mins:20, freq:"twice-weekly" },
+  { loc:"Kitchen",        floor:0,   task:"Oven clean inside & out",                       mins:60, freq:"quarterly", note:"Block a morning" },
+  { loc:"Kitchen",        floor:0,   task:"Fridge strip & clean inside",                   mins:60, freq:"monthly",   note:"Takes a full slot" },
+  { loc:"Kitchen",        floor:0,   task:"Sort & clean pantry + shelving",                mins:60, freq:"monthly",   note:"Do half, come back" },
+  { loc:"Garden",         floor:1,   task:"Tidy & rake",                                   mins:60, freq:"weekly-summer" },
+  { loc:"Cellar",         floor:-1,  task:"Service washing machine & dryer",               mins:30, freq:"monthly" },
+  { loc:"Cellar",         floor:-1,  task:"Tidy the cellar",                               mins:60, freq:"monthly" },
+  { loc:"Front yard",     floor:0,   task:"Tidy & jetwash",                                mins:60, freq:"quarterly", note:"Block a morning" },
 ];
-
 const WEEK_SCHED = [
-  { desc:"Ground floor",          tasks:[14,15,17,19] },
-  { desc:"Bedrooms",              tasks:[4,5,7,8] },
-  { desc:"Bathrooms & stairs",    tasks:[12,10] },
-  { desc:"Mid-week refresh",      tasks:[15,19,14] },
-  { desc:"Light tidy",            tasks:[17,7,19] },
-  { desc:"Ground floor refresh",  tasks:[15,19,10,14] },
-  { desc:"Rest day",              tasks:[] },
+  { desc:"Ground floor",         tasks:[14,15,17,19] },
+  { desc:"Bedrooms",             tasks:[4,5,7,8] },
+  { desc:"Bathrooms & stairs",   tasks:[12,10] },
+  { desc:"Mid-week refresh",     tasks:[15,19,14] },
+  { desc:"Light tidy",           tasks:[17,7,19] },
+  { desc:"Ground floor refresh", tasks:[15,19,10,14] },
+  { desc:"Rest day",             tasks:[] },
 ];
 const MONTHLY_EXTRAS = [[0,2],[6,9,13],[1,3,11],[21,24,18]];
 const FLOOR_NAMES = {"-1":"Cellar","0":"Ground floor","1":"First floor","2":"Second floor","-99":"All floors"};
-const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-const DAY_SHORT = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const DAY_NAMES  = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const DAY_SHORT  = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const CAL_COLORS = ["#007aff","#34c759","#af52de","#ff9500","#ff3b30","#5ac8fa"];
 
-// Waltham Forest bin schedule
-// Food waste: every week (Thursday)
-// Recycling: fortnightly
-// General: fortnightly (alternating with recycling)
-// We'll use a reference date to compute which week it is
-const BIN_REF = new Date("2024-01-04"); // a Thursday with general waste
+// ─── BIN ─────────────────────────────────────────────────────────────────────
+const BIN_REF = new Date("2024-01-04");
 function getBinInfo() {
-  const today = new Date();
-  const day = today.getDay(); // 0=Sun
-  // Find next/this Thursday
+  const today = new Date(), day = today.getDay();
   const daysToThurs = (4 - day + 7) % 7;
   const nextThurs = new Date(today);
   nextThurs.setDate(today.getDate() + daysToThurs);
   nextThurs.setHours(0,0,0,0);
   const weeksSinceRef = Math.round((nextThurs - BIN_REF) / (7*24*3600*1000));
-  const isRecycling = weeksSinceRef % 2 === 1;
-  const isToday = daysToThurs === 0;
-  const isTomorrow = daysToThurs === 1;
-  return {
-    dayLabel: isToday ? "today" : isTomorrow ? "tomorrow" : `in ${daysToThurs} days`,
-    isToday, isTomorrow,
-    recycling: isRecycling,
-    general: !isRecycling,
-    urgent: daysToThurs <= 1,
-  };
+  const recycling = weeksSinceRef % 2 === 1;
+  return { daysToThurs, isToday: daysToThurs===0, isTomorrow: daysToThurs===1, recycling, urgent: daysToThurs<=1 };
 }
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
-
 const S = {
-  tab: "today",
-  activeDay: null,
-  checks: {},
-  checksDate: "",
-  todos: [],
-  notes: "",
-  notifTime: "08:00",
-  notifEnabled: false,
-  icalUrl: "",
-  calLastFetched: "",
-  calEvents: [],
-  calLoaded: false,
-  weather: null,
-  weatherTs: 0,
+  tab: "today", activeDay: null,
+  checks: {}, checksDate: "", todos: [], notes: "",
+  notifTime: "08:00", notifEnabled: false,
+  icalUrl: "", calLastFetched: "", calEvents: [],
+  weather: null, weatherTs: 0,
 };
-
 function load() {
   const today = todayStr();
-  S.checks     = JSON.parse(ls("checks","{}"));
-  S.checksDate = ls("checksDate","");
-  S.todos      = JSON.parse(ls("todos","[]"));
-  S.notes      = ls("notes","");
-  S.notifTime  = ls("notifTime","08:00");
-  S.notifEnabled = ls("notifEnabled","") === "true";
-  S.icalUrl    = ls("icalUrl","");
-  S.calLastFetched = ls("calLastFetched","");
-  S.weather    = JSON.parse(ls("weather","null"));
-  S.weatherTs  = parseInt(ls("weatherTs","0"));
-  S.activeDay  = todayDayIdx();
+  S.checks        = JSON.parse(ls("checks","{}"));
+  S.checksDate    = ls("checksDate","");
+  S.todos         = JSON.parse(ls("todos","[]"));
+  S.notes         = ls("notes","");
+  S.notifTime     = ls("notifTime","08:00");
+  S.notifEnabled  = ls("notifEnabled","") === "true";
+  S.icalUrl       = ls("icalUrl","");
+  S.calLastFetched= ls("calLastFetched","");
+  S.weather       = JSON.parse(ls("weather","null"));
+  S.weatherTs     = parseInt(ls("weatherTs","0"));
+  S.activeDay     = todayDayIdx();
   if (S.checksDate !== today) { S.checks = {}; S.checksDate = today; saveChecks(); }
 }
-function ls(k,d){ return localStorage.getItem(k) ?? d; }
+function ls(k,d){ return localStorage.getItem(k)??d; }
 function saveChecks(){ localStorage.setItem("checks",JSON.stringify(S.checks)); localStorage.setItem("checksDate",S.checksDate); }
 function saveTodos(){ localStorage.setItem("todos",JSON.stringify(S.todos)); }
 function saveNotes(){ localStorage.setItem("notes",S.notes); }
@@ -429,621 +579,385 @@ function todayDayIdx(){ const d=new Date().getDay(); return d===0?6:d-1; }
 function weekOfMonth(){ return Math.min(Math.ceil(new Date().getDate()/7)-1,3); }
 
 // ─── WEATHER ─────────────────────────────────────────────────────────────────
-
-const WX_CODES = {
-  0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",
-  51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",
-  71:"🌨",73:"🌨",75:"❄️",80:"🌦",81:"🌧",82:"🌧",
-  95:"⛈",96:"⛈",99:"⛈"
-};
-const WX_DESC = {
-  0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",
-  45:"Foggy",48:"Icy fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",
-  61:"Slight rain",63:"Rain",65:"Heavy rain",71:"Slight snow",73:"Snow",75:"Heavy snow",
-  80:"Rain showers",81:"Rain showers",82:"Heavy showers",95:"Thunderstorm",96:"Thunderstorm",99:"Thunderstorm"
-};
-
+const WX_CODES={0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",51:"🌦",53:"🌦",55:"🌧",61:"🌧",63:"🌧",65:"🌧",71:"🌨",73:"🌨",75:"❄️",80:"🌦",81:"🌧",82:"🌧",95:"⛈",96:"⛈",99:"⛈"};
+const WX_DESC={0:"Clear",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Foggy",48:"Icy fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",71:"Light snow",73:"Snow",75:"Heavy snow",80:"Showers",81:"Showers",82:"Heavy showers",95:"Thunderstorm",96:"Thunderstorm",99:"Thunderstorm"};
 async function fetchWeather(force) {
   const now = Date.now();
-  if (!force && S.weather && (now - S.weatherTs) < 30*60*1000) { renderWeather(); return; }
-  // Leyton coords
-  const lat = 51.568, lon = -0.0155;
+  if (!force && S.weather && (now-S.weatherTs)<30*60*1000) { renderWeather(); return; }
   try {
-    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode,windspeed_10m,precipitation&hourly=temperature_2m&timezone=Europe%2FLondon&forecast_days=1`);
+    const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.568&longitude=-0.0155&current=temperature_2m,weathercode,windspeed_10m,precipitation&timezone=Europe%2FLondon&forecast_days=1");
     const d = await r.json();
-    S.weather = {
-      temp: Math.round(d.current.temperature_2m),
-      code: d.current.weathercode,
-      wind: Math.round(d.current.windspeed_10m),
-      rain: d.current.precipitation,
-    };
+    S.weather = { temp:Math.round(d.current.temperature_2m), code:d.current.weathercode, wind:Math.round(d.current.windspeed_10m), rain:d.current.precipitation };
     S.weatherTs = now;
-    localStorage.setItem("weather", JSON.stringify(S.weather));
-    localStorage.setItem("weatherTs", String(now));
-  } catch(e) { S.weather = null; }
+    localStorage.setItem("weather",JSON.stringify(S.weather));
+    localStorage.setItem("weatherTs",String(now));
+  } catch(e){ S.weather=null; }
   renderWeather();
 }
-
 function refreshWeather(){ fetchWeather(true); showToast("Refreshing weather…"); }
-
 function renderWeather() {
-  const el = document.getElementById("weatherStrip");
-  if (!S.weather) {
-    el.innerHTML = `<span class="wx-loading">Weather unavailable — tap 🌤 to retry</span>`; return;
-  }
+  const el = document.getElementById("weatherBar");
+  if (!S.weather) { el.innerHTML=`<span class="wx-stat" style="color:var(--label3)">Tap ↻ to load weather</span>`; return; }
   const {temp,code,wind,rain} = S.weather;
-  const icon = WX_CODES[code] || "🌡";
-  const desc = WX_DESC[code] || "";
-  el.innerHTML = `
-    <span class="wx-icon">${icon}</span>
-    <div>
-      <span class="wx-temp">${temp}°C</span>
-      <span class="wx-desc" style="margin-left:6px">${desc}</span>
-    </div>
-    <div class="wx-details">
-      <div class="wx-detail-row">💨 ${wind} km/h</div>
-      <div class="wx-detail-row">${rain > 0 ? `🌧 ${rain}mm` : 'No rain'}</div>
-    </div>`;
+  el.innerHTML=`<span class="wx-icon">${WX_CODES[code]||"🌡"}</span><span class="wx-temp">${temp}°C</span><span class="wx-desc">${WX_DESC[code]||""}</span><div class="wx-right"><span class="wx-stat">💨 ${wind} km/h</span><span class="wx-stat">${rain>0?`🌧 ${rain}mm`:"No rain"}</span></div>`;
 }
 
 // ─── CALENDAR ────────────────────────────────────────────────────────────────
-
 async function fetchCal(showToastMsg) {
   if (!S.icalUrl) return;
-  const icalUrl = S.icalUrl.replace('webcal://','https://');
-  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(icalUrl)}`;
+  const url = S.icalUrl.replace("webcal://","https://");
+  const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
   try {
-    const r = await fetch(proxyUrl);
+    const r = await fetch(proxy);
     const text = await r.text();
     S.calEvents = parseIcal(text);
-    S.calLoaded = true;
-    const now = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const now = new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
     S.calLastFetched = now;
-    localStorage.setItem('calLastFetched', now);
-    if (showToastMsg) showToast('Calendar refreshed ✓');
+    localStorage.setItem("calLastFetched",now);
+    if (showToastMsg) showToast("Calendar refreshed ✓");
     render();
   } catch(e) {
-    S.calLoaded = true;
-    if (showToastMsg) showToast('Could not reach calendar — try again');
-    render();
+    if (showToastMsg) showToast("Could not reach calendar — try again");
   }
 }
-
 function parseIcal(text) {
-  const events = [];
-  const blocks = text.split("BEGIN:VEVENT");
-  for (let i = 1; i < blocks.length; i++) {
-    const b = blocks[i];
-    const get = (key) => {
-      const m = b.match(new RegExp(key + "[^:]*:([^\\r\\n]+)"));
-      return m ? m[1].trim() : "";
-    };
-    const summary = get("SUMMARY");
-    const dtstart = get("DTSTART");
-    const dtend   = get("DTEND");
-    const allDay  = !dtstart.includes("T");
-    let start = parseIcalDate(dtstart);
-    let end   = parseIcalDate(dtend);
-    if (summary && start) events.push({ summary, start, end, allDay });
+  const events=[], blocks=text.split("BEGIN:VEVENT");
+  for (let i=1;i<blocks.length;i++) {
+    const b=blocks[i], get=k=>{ const m=b.match(new RegExp(k+"[^:]*:([^\\r\\n]+)")); return m?m[1].trim():""; };
+    const summary=get("SUMMARY"), dtstart=get("DTSTART"), dtend=get("DTEND");
+    const allDay=!dtstart.includes("T");
+    const start=parseIcalDate(dtstart), end=parseIcalDate(dtend);
+    if (summary&&start) events.push({summary,start,end,allDay});
   }
   return events;
 }
-
 function parseIcalDate(s) {
   if (!s) return null;
-  if (s.includes("T")) {
-    const y=s.slice(0,4),mo=s.slice(4,6),d=s.slice(6,8),h=s.slice(9,11),mi=s.slice(11,13);
-    return new Date(`${y}-${mo}-${d}T${h}:${mi}:00`);
-  }
-  const y=s.slice(0,4),mo=s.slice(4,6),d=s.slice(6,8);
-  return new Date(`${y}-${mo}-${d}T00:00:00`);
+  if (s.includes("T")) { const y=s.slice(0,4),mo=s.slice(4,6),d=s.slice(6,8),h=s.slice(9,11),mi=s.slice(11,13); return new Date(`${y}-${mo}-${d}T${h}:${mi}:00`); }
+  return new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T00:00:00`);
 }
-
-function getTodayEvents() {
-  const now = new Date();
-  const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
-  const todayEnd   = new Date(now); todayEnd.setHours(23,59,59,999);
-  return S.calEvents.filter(e => {
-    if (!e.start) return false;
-    return e.start <= todayEnd && (e.end ? e.end >= todayStart : e.start >= todayStart);
-  }).sort((a,b) => a.start - b.start);
+function getEventsForDate(date) {
+  const s=new Date(date); s.setHours(0,0,0,0);
+  const e=new Date(date); e.setHours(23,59,59,999);
+  return S.calEvents.filter(ev=>ev.start<=e&&(ev.end?ev.end>=s:ev.start>=s)).sort((a,b)=>a.start-b.start);
 }
-
-function getDayEvents(date) {
-  const s = new Date(date); s.setHours(0,0,0,0);
-  const e = new Date(date); e.setHours(23,59,59,999);
-  return S.calEvents.filter(ev => ev.start <= e && (ev.end ? ev.end >= s : ev.start >= s))
-    .sort((a,b) => a.start - b.start);
-}
-
-function fmtTime(d, allDay) {
-  if (allDay) return "All day";
-  return d.toLocaleTimeString("en-GB", {hour:"2-digit",minute:"2-digit"});
-}
+function fmtTime(d,allDay){ return allDay?"All day":d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }
 
 // ─── CLEANING ────────────────────────────────────────────────────────────────
-
 function getDayTasks(dayIdx) {
-  const base = [...WEEK_SCHED[dayIdx].tasks];
-  if (dayIdx === todayDayIdx()) {
-    MONTHLY_EXTRAS[weekOfMonth()].forEach(i => { if (!base.includes(i)) base.push(i); });
-  }
-  return [...new Set(base)].map(i => ({...TASKS[i], id:i}));
+  const base=[...WEEK_SCHED[dayIdx].tasks];
+  if (dayIdx===todayDayIdx()) MONTHLY_EXTRAS[weekOfMonth()].forEach(i=>{ if(!base.includes(i)) base.push(i); });
+  return [...new Set(base)].map(i=>({...TASKS[i],id:i}));
 }
-
 function groupByFloor(tasks) {
-  const g = {};
-  tasks.forEach(t => { if (!g[t.floor]) g[t.floor]=[]; g[t.floor].push(t); });
-  return Object.entries(g).sort((a,b) => {
-    const fa=parseInt(a[0]), fb=parseInt(b[0]);
-    if(fa===-99) return 1; if(fb===-99) return -1; return fa-fb;
-  });
+  const g={};
+  tasks.forEach(t=>{ if(!g[t.floor]) g[t.floor]=[]; g[t.floor].push(t); });
+  return Object.entries(g).sort((a,b)=>{ const fa=parseInt(a[0]),fb=parseInt(b[0]); if(fa===-99)return 1; if(fb===-99)return -1; return fa-fb; });
 }
+function toggleTask(dayIdx,id) { const k=`${dayIdx}-${id}`; S.checks[k]=!S.checks[k]; saveChecks(); render(); }
 
-function toggleTask(dayIdx, id) {
-  const k = `${dayIdx}-${id}`;
-  S.checks[k] = !S.checks[k];
-  saveChecks(); render();
-}
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+const TABS = [
+  {id:"today",    label:"Today",    icon:"🏠"},
+  {id:"cleaning", label:"Cleaning", icon:"🧹"},
+  {id:"calendar", label:"Calendar", icon:"📅"},
+  {id:"todos",    label:"To-do",    icon:"✅"},
+  {id:"notes",    label:"Notes",    icon:"📝"},
+];
+const TAB_TITLES = {today:"Family Homepage",cleaning:"Cleaning",calendar:"Calendar",todos:"To-do",notes:"Notes"};
 
-// ─── RENDER ──────────────────────────────────────────────────────────────────
-
-function renderNav() {
-  const tabs = [
-    {id:"today", label:"Today", icon:"🏠"},
-    {id:"cleaning", label:"Cleaning", icon:"🧹"},
-    {id:"calendar", label:"Calendar", icon:"📅"},
-    {id:"todos", label:"To-do", icon:"✅"},
-    {id:"notes", label:"Notes", icon:"📝"},
-  ];
-  document.getElementById("nav").innerHTML = tabs.map(t =>
-    `<div class="nav-tab${S.tab===t.id?" active":""}" onclick="switchTab('${t.id}')">${t.icon} ${t.label}</div>`
+function renderTabBar() {
+  document.getElementById("tabBar").innerHTML = TABS.map(t=>
+    `<div class="tab-item${S.tab===t.id?" active":""}" onclick="switchTab('${t.id}')">
+      <span class="tab-icon">${t.icon}</span>
+      <span class="tab-label">${t.label}</span>
+    </div>`
   ).join("");
 }
 
 function render() {
-  renderNav();
-  const b = document.getElementById("body");
-  if (S.tab === "today") b.innerHTML = renderToday();
-  else if (S.tab === "cleaning") b.innerHTML = renderCleaning();
-  else if (S.tab === "calendar") b.innerHTML = renderCalendar();
-  else if (S.tab === "todos") b.innerHTML = renderTodos();
-  else if (S.tab === "notes") b.innerHTML = renderNotes();
+  document.getElementById("navTitle").textContent = TAB_TITLES[S.tab];
+  renderTabBar();
+  const el = document.getElementById("pageContent");
+  if (S.tab==="today")    el.innerHTML = renderToday();
+  if (S.tab==="cleaning") el.innerHTML = renderCleaning();
+  if (S.tab==="calendar") el.innerHTML = renderCalendar();
+  if (S.tab==="todos")    el.innerHTML = renderTodos();
+  if (S.tab==="notes")    el.innerHTML = renderNotes();
 }
 
-function switchTab(t) { S.tab = t; S.activeDay = todayDayIdx(); render(); document.getElementById("body").scrollTop = 0; }
+function switchTab(t) { S.tab=t; S.activeDay=todayDayIdx(); render(); document.getElementById("scrollBody").scrollTop=0; }
 
-// ─── TODAY TAB ───────────────────────────────────────────────────────────────
+// ─── RENDER HELPERS ──────────────────────────────────────────────────────────
+function calRows(events) {
+  if (!events.length) return `<div class="cal-empty">Nothing on</div>`;
+  return events.map((e,i)=>`<div class="cal-row">
+    <div class="cal-dot" style="background:${CAL_COLORS[i%CAL_COLORS.length]}"></div>
+    <div class="cal-title">${e.summary}</div>
+    <div class="cal-time">${fmtTime(e.start,e.allDay)}</div>
+  </div>`).join("");
+}
 
+function cleaningSection(dayIdx) {
+  const tasks=getDayTasks(dayIdx);
+  if (!tasks.length) return `<div class="rest-day"><div class="rest-emoji">🌿</div><div class="rest-title">Rest day</div><div class="rest-sub">No cleaning today</div></div>`;
+  const done=tasks.filter(t=>S.checks[`${dayIdx}-${t.id}`]).length;
+  const total=tasks.reduce((s,t)=>s+t.mins,0);
+  const remaining=tasks.filter(t=>!S.checks[`${dayIdx}-${t.id}`]).reduce((s,t)=>s+t.mins,0);
+  const pct=Math.min(100,Math.round(total/60*100));
+  const allDone=done===tasks.length;
+  let html=`<div class="progress-row">
+    <span class="progress-label">${remaining}m left</span>
+    <div class="progress-track"><div class="progress-fill${allDone?" done":pct>100?" over":""}" style="width:${pct}%"></div></div>
+    <span class="progress-label">${total}m</span>
+  </div>`;
+  groupByFloor(tasks).forEach(([floor,ft])=>{
+    html+=`<div class="inset-header">${FLOOR_NAMES[floor]||"Other"}</div>`;
+    ft.forEach(t=>{
+      const k=`${dayIdx}-${t.id}`,chk=S.checks[k];
+      html+=`<div class="table-row${chk?" checked":""}" onclick="toggleTask(${dayIdx},${t.id})">
+        <div class="row-check"><span class="row-check-tick">✓</span></div>
+        <div class="row-body">
+          <div class="row-label">${t.task}</div>
+          <div class="row-sublabel">${t.loc}${t.note?" · "+t.note:""}</div>
+        </div>
+        <div class="row-detail" style="font-size:14px;color:var(--label3)">${t.mins}m</div>
+      </div>`;
+    });
+  });
+  if (allDone) html+=`</div><div style="height:10px"></div><div class="all-done-banner"><div class="all-done-title">✨ All done — house looking great</div></div><div style="height:1px">`;
+  return html;
+}
+
+// ─── TODAY ───────────────────────────────────────────────────────────────────
 function renderToday() {
-  const dayIdx = todayDayIdx();
-  const tasks  = getDayTasks(dayIdx);
-  const events = getTodayEvents();
-  const bin    = getBinInfo();
-  const doneCnt = tasks.filter(t => S.checks[`${dayIdx}-${t.id}`]).length;
-  const allDone = tasks.length > 0 && doneCnt === tasks.length;
+  const dayIdx=todayDayIdx();
+  const todayEvents=getEventsForDate(new Date());
+  const bin=getBinInfo();
+  const tasks=getDayTasks(dayIdx);
+  const done=tasks.filter(t=>S.checks[`${dayIdx}-${t.id}`]).length;
+  let html=`<div class="large-title-section"><div class="large-title">${new Date().toLocaleDateString("en-GB",{weekday:"long"})}</div><div class="large-subtitle">${WEEK_SCHED[dayIdx].desc}</div></div>`;
 
-  let html = "";
-
-  // Calendar card
-  html += `<div class="section-card">
-    <div class="section-head">
-      <div class="section-head-left"><span class="section-icon">📅</span><span class="section-title">Today's schedule</span></div>
-      ${events.length ? `<span class="section-badge badge-blue">${events.length} event${events.length>1?"s":""}</span>` : ""}
-    </div>
-    <div class="section-body">`;
+  // Calendar
+  html+=`<div class="table-group">
+    <div class="table-group-header">Schedule</div>
+    <div class="table-card">`;
   if (!S.icalUrl) {
-    html += `<div class="cal-setup">
-      <div class="cal-setup-text">Connect your calendar to see events here.<br>Add your iCal URL in ⚙️ Settings.</div>
-      <div class="cal-setup-btn" onclick="openSettings()">Add calendar →</div>
-    </div>`;
-  } else if (events.length === 0) {
-    html += `<div class="cal-empty">Nothing scheduled today 🎉</div>`;
+    html+=`<div class="setup-cell"><div class="setup-text">Connect your calendar in Settings to see events here.</div><div class="setup-link" onclick="openSettings()">Add calendar →</div></div>`;
   } else {
-    const colors = ["#2d6a4f","#1d4ed8","#6d28d9","#b45309","#b91c1c"];
-    html += events.map((e,i) => `<div class="cal-event">
-      <div class="cal-dot-wrap"><div class="cal-dot" style="background:${colors[i%colors.length]}"></div></div>
-      <div class="cal-body">
-        <div class="cal-title">${e.summary}</div>
-      </div>
-      <div class="cal-time">${fmtTime(e.start, e.allDay)}</div>
-    </div>`).join("");
+    html+=calRows(todayEvents);
   }
-  html += `</div></div>`;
+  html+=`</div></div>`;
 
-  // Bin card
+  // Bin
   if (bin.urgent) {
-    html += `<div class="section-card">
-      <div class="section-head">
-        <div class="section-head-left"><span class="section-icon">🗑</span><span class="section-title">Bin day</span></div>
-        <span class="section-badge ${bin.isToday?"badge-red":"badge-amber"}">${bin.isToday?"Today!":"Tomorrow"}</span>
-      </div>
-      <div class="bin-row">
-        <div class="bin-icon">${bin.recycling?"♻️":"🗑"}</div>
-        <div class="bin-body">
-          <div class="bin-title">${bin.recycling?"Recycling + food waste":"General waste + food waste"}</div>
-          <div class="bin-sub">Put bins out ${bin.isToday?"this morning":"tonight"}</div>
-          <div class="bin-days">Food waste goes out every week</div>
+    html+=`<div class="table-group">
+      <div class="table-group-header">Bins</div>
+      <div class="table-card">
+        <div class="bin-content">
+          <div class="bin-emoji">${bin.recycling?"♻️":"🗑️"}</div>
+          <div class="bin-body">
+            <div class="row-label">${bin.recycling?"Recycling + food waste":"General waste + food waste"}</div>
+            <div class="row-sublabel">${bin.isToday?"Out this morning":"Put out tonight"} · food waste every week</div>
+          </div>
+          <span class="badge ${bin.isToday?"badge-red":"badge-orange"}">${bin.isToday?"Today":"Tomorrow"}</span>
         </div>
       </div>
     </div>`;
   }
 
-  // Cleaning card
-  html += `<div class="section-card">
-    <div class="section-head">
-      <div class="section-head-left"><span class="section-icon">🧹</span><span class="section-title">Cleaning — ${WEEK_SCHED[dayIdx].desc}</span></div>
-      ${tasks.length ? `<span class="section-badge ${allDone?"badge-green":"badge-amber"}">${doneCnt}/${tasks.length}</span>` : ""}
-    </div>`;
+  // Cleaning
+  html+=`<div class="table-group">
+    <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px">
+      <span>Cleaning</span>
+      ${tasks.length?`<span style="font-weight:500;color:var(--label2)">${done}/${tasks.length}</span>`:""}
+    </div>
+    <div class="table-card">${cleaningSection(dayIdx)}</div>
+  </div>`;
 
-  if (tasks.length === 0) {
-    html += `<div class="rest-day"><div class="rest-day-emoji">🌿</div><div class="rest-day-title">Rest day</div><div class="rest-day-sub">No tasks today</div></div>`;
-  } else {
-    const total = tasks.reduce((s,t)=>s+t.mins,0);
-    const remaining = tasks.filter(t=>!S.checks[`${dayIdx}-${t.id}`]).reduce((s,t)=>s+t.mins,0);
-    const pct = Math.min(100,Math.round(total/60*100));
-    html += `<div class="time-row">
-      <div class="time-label">${remaining}m left</div>
-      <div class="time-track"><div class="time-fill${pct>100?" over":""}" style="width:${pct}%"></div></div>
-      <div class="time-label">${total}m total</div>
-    </div>`;
-    const grouped = groupByFloor(tasks);
-    html += `<div class="section-body">`;
-    grouped.forEach(([floor,floorTasks]) => {
-      html += `<div class="floor-grp">${FLOOR_NAMES[floor]||"Other"}</div>`;
-      floorTasks.forEach(t => {
-        const k=`${dayIdx}-${t.id}`, done=S.checks[k]?" done":"";
-        html += `<div class="task-item${done}" onclick="toggleTask(${dayIdx},${t.id})">
-          <div class="chk"><span class="chk-tick">✓</span></div>
-          <div class="task-body2">
-            <div class="task-name">${t.task}</div>
-            <div class="task-loc">${t.loc}${t.note?" · "+t.note:""}</div>
-          </div>
-          <div class="task-mins-pill">${t.mins}m</div>
-        </div>`;
-      });
-    });
-    html += `</div>`;
-    if (allDone) html += `<div class="all-done-strip"><div class="all-done-strip-title">✨ All done for today!</div><div class="all-done-strip-sub">House looking great.</div></div>`;
-  }
-  html += `</div>`;
-
-  // Todos preview
-  const openTodos = S.todos.filter(t=>!t.done);
+  // To-dos
+  const openTodos=S.todos.filter(t=>!t.done);
   if (openTodos.length) {
-    html += `<div class="section-card">
-      <div class="section-head">
-        <div class="section-head-left"><span class="section-icon">✅</span><span class="section-title">To-do</span></div>
-        <span class="section-badge badge-purple">${openTodos.length} open</span>
-      </div>
-      <div class="section-body">
-        ${openTodos.slice(0,4).map(t=>`<div class="todo-item${t.done?" done":""}" onclick="toggleTodo('${t.id}')">
-          <div class="chk"><span class="chk-tick">✓</span></div>
-          <div class="todo-text">${t.text}</div>
+    html+=`<div class="table-group">
+      <div class="table-group-header">To-do</div>
+      <div class="table-card">
+        ${openTodos.slice(0,5).map(t=>`<div class="table-row no-indent" onclick="toggleTodo('${t.id}')">
+          <div class="row-check"><span class="row-check-tick">✓</span></div>
+          <div class="row-body"><div class="row-label">${t.text}</div></div>
         </div>`).join("")}
-        ${openTodos.length>4?`<div class="cal-empty" onclick="switchTab('todos')" style="cursor:pointer;color:var(--blue)">See all ${openTodos.length} →</div>`:""}
+        ${openTodos.length>5?`<div class="table-row no-indent" onclick="switchTab('todos')"><div class="row-body"><div class="row-label" style="color:var(--blue)">See all ${openTodos.length} →</div></div></div>`:""}
       </div>
     </div>`;
   }
 
-  return html;
+  return html+'<div style="height:8px"></div>';
 }
 
-// ─── CLEANING TAB ────────────────────────────────────────────────────────────
-
+// ─── CLEANING TAB ─────────────────────────────────────────────────────────────
 function renderCleaning() {
-  const dayIdx = S.activeDay;
-  const tasks  = getDayTasks(dayIdx);
-  const doneCnt = tasks.filter(t=>S.checks[`${dayIdx}-${t.id}`]).length;
-  const allDone = tasks.length>0 && doneCnt===tasks.length;
-
-  // Day pills
-  let html = `<div class="day-selector">`;
-  for (let i=0;i<7;i++) {
-    const isToday=i===todayDayIdx(), active=i===dayIdx;
-    html += `<div class="day-pill${active?" active":""}${isToday&&!active?" today-pill":""}" onclick="selectDay(${i})">${DAY_SHORT[i]}${isToday?" ·":""}</div>`;
+  const dayIdx=S.activeDay;
+  const tasks=getDayTasks(dayIdx);
+  const done=tasks.filter(t=>S.checks[`${dayIdx}-${t.id}`]).length;
+  let html=`<div class="day-pills">`;
+  for(let i=0;i<7;i++){
+    const isToday=i===todayDayIdx(),active=i===dayIdx;
+    html+=`<div class="day-pill${active?" active":""}${isToday&&!active?" is-today":""}" onclick="selectDay(${i})">${DAY_SHORT[i]}</div>`;
   }
-  html += `</div>`;
-
-  html += `<div class="section-card">
-    <div class="section-head">
-      <div class="section-head-left"><span class="section-icon">🧹</span><span class="section-title">${DAY_NAMES[dayIdx]} — ${WEEK_SCHED[dayIdx].desc}</span></div>
-      ${tasks.length?`<span class="section-badge ${allDone?"badge-green":"badge-amber"}">${doneCnt}/${tasks.length}</span>`:""}
-    </div>`;
-
-  if (tasks.length===0) {
-    html += `<div class="rest-day"><div class="rest-day-emoji">🌿</div><div class="rest-day-title">Rest day</div><div class="rest-day-sub">No cleaning tasks on ${DAY_NAMES[dayIdx]}</div></div>`;
-  } else {
-    const total=tasks.reduce((s,t)=>s+t.mins,0);
-    const pct=Math.min(100,Math.round(total/60*100));
-    html += `<div class="time-row">
-      <div class="time-label">${total} min total</div>
-      <div class="time-track"><div class="time-fill${pct>100?" over":""}" style="width:${pct}%"></div></div>
-      <div class="time-label">${60-Math.min(60,total)}m free</div>
-    </div><div class="section-body">`;
-    groupByFloor(tasks).forEach(([floor,ft]) => {
-      html += `<div class="floor-grp">${FLOOR_NAMES[floor]||"Other"}</div>`;
-      ft.forEach(t => {
-        const k=`${dayIdx}-${t.id}`,done=S.checks[k]?" done":"";
-        html += `<div class="task-item${done}" onclick="toggleTask(${dayIdx},${t.id})">
-          <div class="chk"><span class="chk-tick">✓</span></div>
-          <div class="task-body2"><div class="task-name">${t.task}</div><div class="task-loc">${t.loc}${t.note?" · "+t.note:""}</div></div>
-          <div class="task-mins-pill">${t.mins}m</div>
-        </div>`;
-      });
-    });
-    html += `</div>`;
-    if (allDone) html += `<div class="all-done-strip"><div class="all-done-strip-title">✨ All done!</div></div>`;
-  }
-  html += `</div>`;
-  return html;
+  html+=`</div>`;
+  html+=`<div class="table-group">
+    <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px">
+      <span>${DAY_NAMES[dayIdx]}</span>
+      ${tasks.length?`<span style="font-weight:500;color:var(--label2)">${done}/${tasks.length}</span>`:""}
+    </div>
+    <div class="table-card">${cleaningSection(dayIdx)}</div>
+  </div>`;
+  return html+'<div style="height:8px"></div>';
 }
-
 function selectDay(i){ S.activeDay=i; render(); }
 
-// ─── CALENDAR TAB ────────────────────────────────────────────────────────────
-
+// ─── CALENDAR TAB ─────────────────────────────────────────────────────────────
 function renderCalendar() {
-  if (!S.icalUrl) return `<div class="section-card"><div class="cal-setup" style="padding:24px">
-    <div class="cal-setup-text" style="font-size:15px;margin-bottom:14px">Connect your Apple / Google Calendar to see events here.<br><br>Paste your private iCal URL in Settings.</div>
-    <div class="cal-setup-btn" onclick="openSettings()" style="font-size:15px">Open Settings →</div>
-  </div></div>`;
-
-  const syncLine = S.calLastFetched
-    ? `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 4px 12px;font-size:13px;color:var(--ink3)">
-        <span>Last synced ${S.calLastFetched}</span>
-        <span style="color:var(--blue);font-weight:600;cursor:pointer" onclick="fetchCal(true)">↻ Refresh</span>
-      </div>`
-    : `<div style="text-align:right;padding:4px 4px 12px">
-        <span style="font-size:13px;color:var(--blue);font-weight:600;cursor:pointer" onclick="fetchCal(true)">↻ Refresh calendar</span>
-      </div>`;
-
-  let html = syncLine;
-  const today = new Date();
-  for (let offset=0; offset<7; offset++) {
-    const d = new Date(today);
-    d.setDate(today.getDate()+offset);
-    const events = getDayEvents(d);
-    const label = offset===0?"Today":offset===1?"Tomorrow":d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"});
-    if (events.length===0 && offset > 1) continue;
-    html += `<div class="section-card">
-      <div class="section-head">
-        <div class="section-head-left"><span class="section-title">${label}</span></div>
-        ${events.length?`<span class="section-badge badge-blue">${events.length}</span>`:""}
-      </div><div class="section-body">`;
-    if (events.length===0) {
-      html += `<div class="cal-empty">Nothing on</div>`;
-    } else {
-      const cols=["#2d6a4f","#1d4ed8","#6d28d9","#b45309","#b91c1c"];
-      html += events.map((e,i)=>`<div class="cal-event">
-        <div class="cal-dot-wrap"><div class="cal-dot" style="background:${cols[i%cols.length]}"></div></div>
-        <div class="cal-body"><div class="cal-title">${e.summary}</div></div>
-        <div class="cal-time">${fmtTime(e.start,e.allDay)}</div>
-      </div>`).join("");
-    }
-    html += `</div></div>`;
+  if (!S.icalUrl) return `<div class="table-group"><div class="table-card"><div class="setup-cell" style="padding:24px"><div class="setup-text">Connect your calendar in Settings to see events here.</div><div class="setup-link" onclick="openSettings()">Open Settings →</div></div></div></div>`;
+  let html=`<div class="table-group">
+    <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px">
+      <span>${S.calLastFetched?"Synced "+S.calLastFetched:""}</span>
+      <span class="sync-btn" onclick="fetchCal(true)">↻ Refresh</span>
+    </div>
+  </div>`;
+  const today=new Date();
+  for(let offset=0;offset<7;offset++){
+    const d=new Date(today); d.setDate(today.getDate()+offset);
+    const events=getEventsForDate(d);
+    const label=offset===0?"Today":offset===1?"Tomorrow":d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"});
+    if (!events.length&&offset>1) continue;
+    html+=`<div class="table-group">
+      <div class="table-group-header">${label}</div>
+      <div class="table-card">${calRows(events)}</div>
+    </div>`;
   }
-  return html || `<div class="section-card"><div class="cal-empty" style="padding:24px">No events in the next 7 days</div></div>`;
+  return html+'<div style="height:8px"></div>';
 }
 
-// ─── TODOS ───────────────────────────────────────────────────────────────────
-
+// ─── TODOS ────────────────────────────────────────────────────────────────────
 function renderTodos() {
-  const open   = S.todos.filter(t=>!t.done);
-  const closed = S.todos.filter(t=>t.done);
-  let html = `<div class="section-card">
-    <div class="section-head"><div class="section-head-left"><span class="section-icon">✅</span><span class="section-title">Family to-do</span></div>
-      ${open.length?`<span class="section-badge badge-purple">${open.length} open</span>`:""}
-    </div>
-    <div class="todo-input-row">
-      <input class="todo-input" id="todoInput" type="text" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTodo()">
-      <button class="todo-add-btn" onclick="addTodo()">Add</button>
-    </div>
-    <div class="section-body">
-      ${open.map(t=>`<div class="todo-item" onclick="toggleTodo('${t.id}')">
-        <div class="chk"><span class="chk-tick">✓</span></div>
-        <div class="todo-text">${t.text}</div>
-        <div class="todo-del" onclick="event.stopPropagation();deleteTodo('${t.id}')">×</div>
+  const open=S.todos.filter(t=>!t.done), closed=S.todos.filter(t=>t.done);
+  let html=`<div class="table-group">
+    <div class="table-group-header">Family to-do</div>
+    <div class="table-card">
+      <div class="todo-input-row">
+        <input class="todo-input" id="todoInput" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="todo-add-btn" onclick="addTodo()">Add</button>
+      </div>
+      ${open.map(t=>`<div class="table-row no-indent" onclick="toggleTodo('${t.id}')">
+        <div class="row-check"><span class="row-check-tick">✓</span></div>
+        <div class="row-body"><div class="row-label">${t.text}</div></div>
+        <div class="row-del" onclick="event.stopPropagation();deleteTodo('${t.id}')">−</div>
       </div>`).join("")}
-      ${open.length===0?`<div class="cal-empty">All clear! 🎉</div>`:""}
+      ${!open.length?`<div class="cal-empty" style="padding:18px">All clear! 🎉</div>`:""}
     </div>
   </div>`;
   if (closed.length) {
-    html += `<div class="section-card">
-      <div class="section-head"><div class="section-head-left"><span class="section-title" style="color:var(--ink3)">Done</span></div>
-        <span class="section-badge">${closed.length}</span>
-      </div>
-      <div class="section-body">
-        ${closed.map(t=>`<div class="todo-item done" onclick="toggleTodo('${t.id}')">
-          <div class="chk"><span class="chk-tick">✓</span></div>
-          <div class="todo-text">${t.text}</div>
-          <div class="todo-del" onclick="event.stopPropagation();deleteTodo('${t.id}')">×</div>
+    html+=`<div class="table-group">
+      <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px"><span>Completed</span><span style="color:var(--red);cursor:pointer;font-size:13px;font-weight:500" onclick="clearDoneTodos()">Clear all</span></div>
+      <div class="table-card">
+        ${closed.map(t=>`<div class="table-row no-indent checked" onclick="toggleTodo('${t.id}')">
+          <div class="row-check"><span class="row-check-tick">✓</span></div>
+          <div class="row-body"><div class="row-label">${t.text}</div></div>
+          <div class="row-del" onclick="event.stopPropagation();deleteTodo('${t.id}')">−</div>
         </div>`).join("")}
-      </div>
-      <div style="padding:10px 14px;text-align:right">
-        <span style="font-size:13px;color:var(--red);cursor:pointer" onclick="clearDoneTodos()">Clear completed</span>
       </div>
     </div>`;
   }
-  return html;
+  return html+'<div style="height:8px"></div>';
 }
-
-function addTodo() {
-  const inp = document.getElementById("todoInput");
-  const text = inp?.value.trim();
-  if (!text) return;
-  S.todos.unshift({id:Date.now().toString(), text, done:false});
-  saveTodos(); inp.value=""; render();
-}
-
-function toggleTodo(id) {
-  const t = S.todos.find(t=>t.id===id);
-  if (t) { t.done=!t.done; saveTodos(); render(); }
-}
-
-function deleteTodo(id) {
-  S.todos = S.todos.filter(t=>t.id!==id);
-  saveTodos(); render();
-}
-
-function clearDoneTodos() {
-  S.todos = S.todos.filter(t=>!t.done);
-  saveTodos(); render();
-}
+function addTodo(){ const inp=document.getElementById("todoInput"); const v=inp?.value.trim(); if(!v)return; S.todos.unshift({id:Date.now().toString(),text:v,done:false}); saveTodos(); inp.value=""; render(); }
+function toggleTodo(id){ const t=S.todos.find(t=>t.id===id); if(t){t.done=!t.done; saveTodos(); render();} }
+function deleteTodo(id){ S.todos=S.todos.filter(t=>t.id!==id); saveTodos(); render(); }
+function clearDoneTodos(){ S.todos=S.todos.filter(t=>!t.done); saveTodos(); render(); }
 
 // ─── NOTES ───────────────────────────────────────────────────────────────────
-
 function renderNotes() {
-  return `<div class="section-card">
-    <div class="section-head"><div class="section-head-left"><span class="section-icon">📝</span><span class="section-title">Family notes</span></div></div>
-    <textarea class="notes-area" id="notesArea" placeholder="Anything on your mind — shopping, reminders, ideas…" oninput="updateNotes(this.value)">${S.notes}</textarea>
-    <div class="notes-footer">
-      <span class="notes-saved" id="notesSaved"></span>
-      ${S.notes?`<span class="notes-clear" onclick="clearNotes()">Clear</span>`:""}
+  return `<div class="table-group">
+    <div class="table-group-header">Family notes</div>
+    <div class="table-card">
+      <textarea class="notes-textarea" id="notesArea" placeholder="Shopping, reminders, ideas…" oninput="updateNotes(this.value)">${S.notes}</textarea>
+      <div class="notes-footer">
+        <span class="notes-saved" id="notesSaved"></span>
+        ${S.notes?`<span class="notes-clear" onclick="clearNotes()">Clear</span>`:""}
+      </div>
     </div>
-  </div>`;
+  </div><div style="height:8px"></div>`;
 }
-
 let notesTimer;
-function updateNotes(v) {
-  S.notes = v;
-  clearTimeout(notesTimer);
-  notesTimer = setTimeout(()=>{ saveNotes(); const el=document.getElementById("notesSaved"); if(el)el.textContent="Saved"; setTimeout(()=>{ if(el)el.textContent=""; },1500); }, 800);
-}
-
-function clearNotes() {
-  if (!confirm("Clear all notes?")) return;
-  S.notes=""; saveNotes(); render();
-}
+function updateNotes(v){ S.notes=v; clearTimeout(notesTimer); notesTimer=setTimeout(()=>{ saveNotes(); const el=document.getElementById("notesSaved"); if(el){el.textContent="Saved";setTimeout(()=>{if(el)el.textContent="";},1500);}},800); }
+function clearNotes(){ if(!confirm("Clear all notes?")) return; S.notes=""; saveNotes(); render(); }
 
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
-
 function openSettings() {
-  const granted = typeof Notification!=="undefined" && Notification.permission==="granted";
-  document.getElementById("overlay").style.display="block";
-  document.getElementById("overlay").innerHTML = `<div class="overlay" onclick="if(event.target.classList.contains('overlay'))closeSettings()">
+  const granted=typeof Notification!=="undefined"&&Notification.permission==="granted";
+  document.getElementById("sheetContainer").innerHTML=`<div class="sheet-overlay" onclick="if(event.target.classList.contains('sheet-overlay'))closeSettings()">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Settings</div>
+    <div class="sheet-nav">
+      <div class="sheet-title">Settings</div>
+      <div class="sheet-close" onclick="closeSettings()">Done</div>
+    </div>
 
-    <div class="setting-row">
-      <div class="setting-col">
-        <div class="setting-label">Calendar (iCal URL)</div>
-        <div class="setting-sub">Paste your webcal:// or https:// link</div>
-        <input class="s-input" id="icalInput" type="url" placeholder="webcal://..." value="${S.icalUrl}">
+    <div class="sheet-group">
+      <div class="sheet-group-hdr">Calendar</div>
+      <div class="sheet-card">
+        <div class="sheet-row"><div><div class="sheet-row-label">iCal URL</div><div class="sheet-row-sub">Paste your webcal:// or https:// link</div></div></div>
+        <div class="s-input-block"><input class="s-input" id="icalInput" type="url" placeholder="webcal://…" value="${S.icalUrl}"></div>
+      </div>
+      <div style="display:flex;gap:8px;padding:8px 0 0">
+        <button class="s-save-btn" onclick="saveIcal()">Save &amp; sync calendar</button>
+      </div>
+      ${S.icalUrl?`<div style="padding:8px 0 0;text-align:center"><button class="s-btn destructive" onclick="clearIcal()">Remove calendar</button></div>`:""}
+    </div>
+
+    <div class="sheet-group">
+      <div class="sheet-group-hdr">Notifications</div>
+      <div class="sheet-card">
+        <div class="sheet-row">
+          <div><div class="sheet-row-label">Daily reminder</div><div class="sheet-row-sub">${granted?"Permission granted":"Add to Home Screen first"}</div></div>
+          ${granted?`<span class="status-pill ${S.notifEnabled?"status-on":"status-off"}">${S.notifEnabled?"On":"Off"}</span>`:`<button class="s-btn" onclick="requestNotif()">Enable</button>`}
+        </div>
+        <div class="sheet-row">
+          <div class="sheet-row-label">Reminder time</div>
+          <select class="s-select" onchange="saveNotifTime(this.value)">
+            ${["07:00","07:30","08:00","08:30","09:00","09:30","10:00"].map(t=>`<option value="${t}"${S.notifTime===t?" selected":""}>${t}</option>`).join("")}
+          </select>
+        </div>
+        ${granted&&S.notifEnabled?`<div class="sheet-row"><div class="sheet-row-label">Test notification</div><button class="s-btn" onclick="testNotif()">Send now</button></div>`:""}
       </div>
     </div>
-    <div style="padding:4px 0 12px; display:flex; gap:8px">
-      <button class="s-btn primary" onclick="saveIcal()">Save & load calendar</button>
-      ${S.icalUrl?`<button class="s-btn" onclick="clearIcal()">Remove</button>`:""}
-    </div>
 
-    <div class="setting-row">
-      <div>
-        <div class="setting-label">Daily notification</div>
-        <div class="setting-sub">${granted?"Permission granted":"Requires 'Add to Home Screen' first"}</div>
+    <div class="sheet-group">
+      <div class="sheet-group-hdr">Cleaning</div>
+      <div class="sheet-card">
+        <div class="sheet-row"><div class="sheet-row-label">Reset today's tasks</div><button class="s-btn destructive" onclick="resetToday()">Reset</button></div>
       </div>
-      ${granted
-        ? `<span style="font-size:13px;padding:4px 10px;border-radius:20px;background:var(--green-bg);color:var(--green-text);font-weight:600">${S.notifEnabled?"On":"Off"}</span>`
-        : `<button class="s-btn primary" onclick="requestNotif()">Enable</button>`
-      }
-    </div>
-
-    <div class="setting-row">
-      <div><div class="setting-label">Reminder time</div></div>
-      <select class="s-select" onchange="saveNotifTime(this.value)">
-        ${["07:00","07:30","08:00","08:30","09:00","09:30","10:00"].map(t=>
-          `<option value="${t}"${S.notifTime===t?" selected":""}>${t}</option>`
-        ).join("")}
-      </select>
-    </div>
-
-    ${granted&&S.notifEnabled?`<div class="setting-row">
-      <div><div class="setting-label">Test notification</div></div>
-      <button class="s-btn" onclick="testNotif()">Send now</button>
-    </div>`:""}
-
-    <div class="setting-row">
-      <div><div class="setting-label">Reset today's cleaning</div></div>
-      <button class="s-btn" onclick="resetToday()">Reset</button>
     </div>
   </div></div>`;
 }
-
-function closeSettings() { document.getElementById("overlay").style.display="none"; document.getElementById("overlay").innerHTML=""; }
-
-function saveIcal() {
-  const v = document.getElementById("icalInput")?.value.trim();
-  S.icalUrl = v||""; localStorage.setItem("icalUrl",S.icalUrl);
-  closeSettings(); showToast('Calendar saved — loading…'); fetchCal(false);
-}
-function clearIcal() { S.icalUrl=""; S.calEvents=[]; localStorage.setItem("icalUrl",""); closeSettings(); render(); }
-
-async function requestNotif() {
-  if (!("Notification" in window)) { alert("Notifications not supported."); return; }
-  const p = await Notification.requestPermission();
-  if (p==="granted") { S.notifEnabled=true; localStorage.setItem("notifEnabled","true"); scheduleNotif(); closeSettings(); showToast("Daily reminders on ✓"); }
-  else alert("Denied. Enable in Safari settings → this website → Notifications.");
-}
-
+function closeSettings(){ document.getElementById("sheetContainer").innerHTML=""; }
+function saveIcal(){ const v=document.getElementById("icalInput")?.value.trim(); S.icalUrl=v||""; localStorage.setItem("icalUrl",S.icalUrl); closeSettings(); showToast("Calendar saved — syncing…"); fetchCal(false); }
+function clearIcal(){ S.icalUrl=""; S.calEvents=[]; localStorage.setItem("icalUrl",""); closeSettings(); render(); }
+async function requestNotif(){ if(!("Notification"in window)){alert("Not supported");return;} const p=await Notification.requestPermission(); if(p==="granted"){S.notifEnabled=true;localStorage.setItem("notifEnabled","true");scheduleNotif();closeSettings();showToast("Reminders on ✓");}else{alert("Denied — enable in Safari settings → this site → Notifications");} }
 function saveNotifTime(t){ S.notifTime=t; localStorage.setItem("notifTime",t); scheduleNotif(); }
+function scheduleNotif(){ if(!S.notifEnabled)return; if(window._notifTimer)clearTimeout(window._notifTimer); const[h,m]=S.notifTime.split(":").map(Number); const next=new Date(); next.setHours(h,m,0,0); if(next<=new Date())next.setDate(next.getDate()+1); window._notifTimer=setTimeout(()=>{ const tasks=getDayTasks(todayDayIdx()); new Notification("Family Homepage 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); scheduleNotif(); },next-new Date()); }
+function testNotif(){ const tasks=getDayTasks(todayDayIdx()); new Notification("Family Homepage 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); }
+function resetToday(){ const di=todayDayIdx(); getDayTasks(di).forEach(t=>delete S.checks[`${di}-${t.id}`]); saveChecks(); closeSettings(); render(); showToast("Today reset"); }
 
-function scheduleNotif() {
-  if (!S.notifEnabled) return;
-  if (window._notifTimer) clearTimeout(window._notifTimer);
-  const [h,m] = S.notifTime.split(":").map(Number);
-  const next = new Date(); next.setHours(h,m,0,0);
-  if (next<=new Date()) next.setDate(next.getDate()+1);
-  window._notifTimer = setTimeout(()=>{
-    const tasks=getDayTasks(todayDayIdx());
-    new Notification("Daily Humans 🏠",{ body:`${tasks.length} cleaning tasks · ${tasks.reduce((s,t)=>s+t.mins,0)} min today`, icon:"icons/icon-192.png" });
-    scheduleNotif();
-  }, next-new Date());
-}
+// ─── INSTALL / TOAST ─────────────────────────────────────────────────────────
+function checkInstall(){ if(localStorage.getItem("installDismissed")||window.navigator.standalone||!/Safari/.test(navigator.userAgent)||/Chrome/.test(navigator.userAgent))return; document.getElementById("installBanner").innerHTML=`<div class="install-banner"><span class="install-text">Tap <strong>⎙ Share</strong> → <strong>Add to Home Screen</strong> for daily alerts</span><span class="install-close" onclick="localStorage.setItem('installDismissed','1');this.closest('.install-banner').remove()">×</span></div>`; }
+function showToast(msg){ const el=document.createElement("div"); el.className="toast"; el.textContent=msg; document.body.appendChild(el); setTimeout(()=>el.remove(),2200); }
 
-function testNotif() {
-  const tasks=getDayTasks(todayDayIdx());
-  new Notification("Daily Humans 🏠",{ body:`${tasks.length} cleaning tasks · ${tasks.reduce((s,t)=>s+t.mins,0)} min today`, icon:"icons/icon-192.png" });
-}
-
-function resetToday() {
-  const di=todayDayIdx(); getDayTasks(di).forEach(t=>delete S.checks[`${di}-${t.id}`]);
-  saveChecks(); closeSettings(); render(); showToast("Today reset");
-}
-
-// ─── INSTALL BANNER ──────────────────────────────────────────────────────────
-
-function checkInstall() {
-  if (localStorage.getItem("installDismissed")||window.navigator.standalone||!/Safari/.test(navigator.userAgent)||/Chrome/.test(navigator.userAgent)) return;
-  document.getElementById("installBanner").innerHTML=`<div class="install-banner">
-    <span style="font-size:20px">📲</span>
-    <span class="install-banner-text">Tap <strong>⎙ Share</strong> → <strong>Add to Home Screen</strong> to get daily alerts</span>
-    <span class="install-banner-close" onclick="localStorage.setItem('installDismissed','1');this.parentElement.remove()">×</span>
-  </div>`;
-}
-
-// ─── TOAST ───────────────────────────────────────────────────────────────────
-
-function showToast(msg) {
-  const el=document.createElement("div"); el.className="toast"; el.textContent=msg;
-  document.body.appendChild(el); setTimeout(()=>el.remove(),2200);
-}
-
-// ─── HEADER DATE ─────────────────────────────────────────────────────────────
-
-function setDate() {
-  document.getElementById("hdrDate").textContent = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
-}
-
-// ─── INIT ────────────────────────────────────────────────────────────────────
-
-load();
-setDate();
-render();
-checkInstall();
-fetchWeather();
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById("navDate").textContent = new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+load(); render(); checkInstall(); fetchWeather();
 if (S.icalUrl) fetchCal(false);
-if (S.notifEnabled && typeof Notification!=="undefined" && Notification.permission==="granted") scheduleNotif();
+if (S.notifEnabled&&typeof Notification!=="undefined"&&Notification.permission==="granted") scheduleNotif();
 </script>
 </body>
 </html>
