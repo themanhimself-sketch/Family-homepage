@@ -5,16 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Family">
+<meta name="apple-mobile-web-app-title" content="Humanji">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <meta name="theme-color" content="#f2f2f7">
-<title>Family Homepage</title>
+<title>Humanji</title>
 <style>
 /* ── iOS SYSTEM TOKENS ── */
 :root {
   --sys-bg:          #f2f2f7;
   --sys-bg2:         rgba(255,255,255,0.92);
   --sys-bg3:         #f2f2f7;
-  --sys-grouped-bg:  #f2f2f7;
+  --sys-grouped-bg:  #eef3ea;
   --sys-fill:        rgba(120,120,128,0.16);
   --sys-fill2:       rgba(120,120,128,0.08);
   --label:           #000000;
@@ -23,12 +25,12 @@
   --label4:          rgba(60,60,67,0.18);
   --separator:       rgba(60,60,67,0.29);
   --sep-opaque:      #c6c6c8;
-  --blue:            #007aff;
-  --green:           #34c759;
-  --orange:          #ff9500;
-  --red:             #ff3b30;
-  --purple:          #af52de;
-  --teal:            #5ac8fa;
+  --blue:            #2f9e6b;
+  --green:           #3fb27a;
+  --orange:          #f08a3c;
+  --red:             #e0466b;
+  --purple:          #c45c9e;
+  --teal:            #3aa6b0;
   --navbar-bg:       rgba(242,242,247,0.55);
   --tabbar-bg:       rgba(249,249,249,0.62);
   --card-bg:         rgba(255,255,255,0.55);
@@ -51,12 +53,12 @@
     --label4:         rgba(235,235,245,0.18);
     --separator:      rgba(84,84,88,0.65);
     --sep-opaque:     #38383a;
-    --blue:           #0a84ff;
-    --green:          #30d158;
-    --orange:         #ff9f0a;
-    --red:            #ff453a;
-    --purple:         #bf5af2;
-    --teal:           #64d2ff;
+    --blue:           #4cba85;
+    --green:          #52c98e;
+--orange:#ffaa55;
+    --red:            #f06088;
+    --purple:         #d47ab8;
+    --teal:           #5bc0ca;
     --navbar-bg:      rgba(28,28,30,0.55);
     --tabbar-bg:      rgba(28,28,30,0.62);
     --card-bg:        rgba(28,28,30,0.50);
@@ -65,7 +67,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(--font); color: var(--label); overflow: hidden; -webkit-font-smoothing: antialiased; }
-#app { position: relative; z-index: 1; }
+#app { position: relative; z-index: 2; }
 #app { height: 100%; display: flex; flex-direction: column; }
 
 /* ── NAVBAR ── */
@@ -197,13 +199,64 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
   opacity: 0;
 }
 
+
+/* ── JUNGLE FOLIAGE ── */
+#foliage {
+  position: fixed;
+  inset: 0;
+  z-index: 1;          /* above weather (0), below app content (2) */
+  pointer-events: none;
+  overflow: hidden;
+}
+/* corner clusters */
+.foliage-corner {
+  position: absolute;
+  width: 200px; height: 200px;
+}
+.foliage-tl { top: calc(var(--safe-t) - 10px); left: -30px; transform: rotate(0deg); }
+.foliage-tr { top: calc(var(--safe-t) - 10px); right: -30px; transform: scaleX(-1); }
+.foliage-bl { bottom: calc(70px + var(--safe-b)); left: -40px; }
+.foliage-br { bottom: calc(70px + var(--safe-b)); right: -40px; transform: scaleX(-1); }
+/* hanging vines from the top */
+.vine {
+  position: absolute;
+  top: calc(var(--safe-t) + 52px);
+  width: 60px;
+  transform-origin: top center;
+  animation: sway 6s ease-in-out infinite;
+}
+.vine-1 { left: 14%; animation-delay: -1s; }
+.vine-2 { right: 22%; animation-delay: -3s; }
+.vine-3 { left: 46%; animation-delay: -5s; width: 46px; }
+@keyframes sway {
+  0%,100% { transform: rotate(-2deg); }
+  50%     { transform: rotate(2.5deg); }
+}
+/* hidden creatures */
+.critter {
+  position: absolute;
+  pointer-events: none;
+}
+.critter-parrot { top: calc(var(--safe-t) + 8px); right: 38px; width: 46px; animation: bob 4s ease-in-out infinite; }
+.critter-monkey { bottom: calc(78px + var(--safe-b)); left: 6px; width: 52px; }
+.critter-frog   { bottom: calc(120px + var(--safe-b)); right: 10px; width: 40px; animation: bob 5s ease-in-out infinite -2s; }
+.critter-butterfly { top: 32%; left: 10px; width: 34px; animation: flutter 7s ease-in-out infinite; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes flutter {
+  0%   { transform: translate(0,0) rotate(-4deg); }
+  25%  { transform: translate(8px,-14px) rotate(4deg); }
+  50%  { transform: translate(2px,-6px) rotate(-3deg); }
+  75%  { transform: translate(12px,-18px) rotate(5deg); }
+  100% { transform: translate(0,0) rotate(-4deg); }
+}
+
 /* ── SCROLL BODY ── */
 .scroll-body {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: transparent;
-  padding-bottom: calc(84px + var(--safe-b));
+  padding-bottom: calc(110px + var(--safe-b));
 }
 
 /* large title section */
@@ -435,10 +488,10 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 .tab-bar {
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: calc(49px + var(--safe-b));
+  height: calc(82px + var(--safe-b));
   background: var(--tabbar-bg);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
   border-top: 0.5px solid var(--separator);
   display: flex;
   align-items: stretch;
@@ -447,14 +500,35 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 }
 .tab-item {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 2px; cursor: pointer;
-  padding: 4px 0 2px; transition: opacity 0.1s;
+  justify-content: center; gap: 5px; cursor: pointer;
+  padding: 8px 0 6px; transition: transform 0.15s ease;
 }
-.tab-item:active { opacity: 0.7; }
-.tab-icon { font-size: 22px; line-height: 1; }
-.tab-label { font-size: 10px; font-weight: 500; color: var(--label3); letter-spacing: 0.01em; }
+.tab-item:active { transform: scale(0.88); }
+.tab-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 13px;
+  transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.tab-icon svg { width: 27px; height: 27px; display: block; color: var(--label3); }
+.tab-item.active .tab-icon svg { color: #fff; }
+.tab-icon svg path, .tab-icon svg circle, .tab-icon svg rect, .tab-icon svg line, .tab-icon svg polyline {
+  stroke: var(--label3);
+  transition: stroke 0.25s ease;
+}
+.tab-label { font-size: 11px; font-weight: 600; color: var(--label3); letter-spacing: 0.02em; transition: color 0.25s ease; }
+/* Active state — filled glassy chip behind the icon + accent colour */
+.tab-item.active .tab-icon {
+  background: var(--blue);
+  box-shadow: 0 4px 14px rgba(0,122,255,0.4);
+  transform: translateY(-2px);
+}
+.tab-item.active .tab-icon svg path,
+.tab-item.active .tab-icon svg circle,
+.tab-item.active .tab-icon svg rect,
+.tab-item.active .tab-icon svg line,
+.tab-item.active .tab-icon svg polyline { stroke: #fff; }
 .tab-item.active .tab-label { color: var(--blue); }
-.tab-item.active .tab-icon { filter: none; }
 
 /* sync row */
 .sync-row {
@@ -560,11 +634,117 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
   <div class="lightning" id="lightning"></div>
 </div>
 <canvas id="weather-canvas"></canvas>
+<div id="foliage">
+  <!-- Top-left leaf cluster -->
+  <svg class="foliage-corner foliage-tl" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <path d="M-10 -10 C 40 20 70 60 75 110 C 50 95 25 70 5 40 C 30 80 55 100 80 130 C 45 125 15 100 -10 70 Z" fill="#3fb27a"/>
+      <path d="M10 -10 C 70 10 110 45 120 95 C 95 80 70 55 50 25 C 75 70 100 95 130 120 C 90 115 50 85 20 50 Z" fill="#2f9e6b"/>
+      <path d="M-10 20 C 50 35 90 70 100 120 C 70 105 45 80 25 50 Z" fill="#46c285" opacity="0.85"/>
+      <!-- monstera leaf -->
+      <path d="M70 30 C 130 35 165 80 160 140 C 130 130 95 100 75 60 Z" fill="#288a5e"/>
+      <path d="M95 70 L 120 80 M110 95 L 135 100 M125 115 L 148 118" stroke="#1f7350" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </svg>
+
+  <!-- Top-right leaf cluster (mirrored) -->
+  <svg class="foliage-corner foliage-tr" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <path d="M-10 -10 C 40 20 70 60 75 110 C 50 95 25 70 5 40 C 30 80 55 100 80 130 C 45 125 15 100 -10 70 Z" fill="#3fb27a"/>
+      <path d="M10 -10 C 70 10 110 45 120 95 C 95 80 70 55 50 25 C 75 70 100 95 130 120 C 90 115 50 85 20 50 Z" fill="#2f9e6b"/>
+      <path d="M-10 20 C 50 35 90 70 100 120 C 70 105 45 80 25 50 Z" fill="#46c285" opacity="0.85"/>
+    </g>
+  </svg>
+
+  <!-- Bottom-left fern -->
+  <svg class="foliage-corner foliage-bl" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <path d="M-10 210 C 30 150 50 100 45 50 C 70 95 80 150 60 210 Z" fill="#2f9e6b"/>
+      <path d="M-20 210 C 20 160 30 120 20 80 C 50 120 55 170 40 210 Z" fill="#3fb27a"/>
+      <path d="M30 210 C 70 165 90 120 95 70 C 110 120 105 175 80 210 Z" fill="#288a5e"/>
+      <!-- big banana leaf -->
+      <path d="M60 210 C 150 180 185 120 175 50 C 130 90 95 150 80 210 Z" fill="#46c285"/>
+      <path d="M90 180 L 150 120 M100 195 L 165 140" stroke="#1f7350" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </svg>
+
+  <!-- Bottom-right fern (mirrored) -->
+  <svg class="foliage-corner foliage-br" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <path d="M-10 210 C 30 150 50 100 45 50 C 70 95 80 150 60 210 Z" fill="#2f9e6b"/>
+      <path d="M-20 210 C 20 160 30 120 20 80 C 50 120 55 170 40 210 Z" fill="#3fb27a"/>
+      <path d="M60 210 C 150 180 185 120 175 50 C 130 90 95 150 80 210 Z" fill="#46c285"/>
+      <path d="M90 180 L 150 120 M100 195 L 165 140" stroke="#1f7350" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </svg>
+
+  <!-- Hanging vines -->
+  <svg class="vine vine-1" viewBox="0 0 60 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M30 0 C 25 60 35 120 30 200" stroke="#2f9e6b" stroke-width="5" stroke-linecap="round"/>
+    <path d="M30 40 C 10 45 5 30 15 22 C 25 30 30 38 30 40 Z" fill="#3fb27a"/>
+    <path d="M30 90 C 50 95 55 80 45 72 C 35 80 30 88 30 90 Z" fill="#46c285"/>
+    <path d="M30 150 C 10 155 5 140 15 132 C 25 140 30 148 30 150 Z" fill="#3fb27a"/>
+  </svg>
+  <svg class="vine vine-2" viewBox="0 0 60 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M30 0 C 35 70 25 130 30 190" stroke="#288a5e" stroke-width="5" stroke-linecap="round"/>
+    <path d="M30 55 C 50 60 55 45 45 37 C 35 45 30 53 30 55 Z" fill="#3fb27a"/>
+    <path d="M30 110 C 10 115 5 100 15 92 C 25 100 30 108 30 110 Z" fill="#46c285"/>
+  </svg>
+  <svg class="vine vine-3" viewBox="0 0 46 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M23 0 C 20 50 26 100 23 160" stroke="#2f9e6b" stroke-width="4" stroke-linecap="round"/>
+    <path d="M23 45 C 40 50 44 36 35 29 C 27 36 23 43 23 45 Z" fill="#46c285"/>
+    <path d="M23 110 C 6 115 2 100 11 93 C 20 100 23 108 23 110 Z" fill="#3fb27a"/>
+  </svg>
+
+  <!-- Hidden creatures -->
+  <!-- Parrot top right -->
+  <svg class="critter critter-parrot" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="25" cy="28" rx="13" ry="17" fill="#e0466b"/>
+    <circle cx="25" cy="14" r="9" fill="#f08a3c"/>
+    <circle cx="22" cy="12" r="2.2" fill="#1f1f1f"/>
+    <path d="M16 14 C 10 13 9 18 15 19 Z" fill="#f5c542"/>
+    <path d="M35 25 C 45 22 46 35 36 38 Z" fill="#3fb27a"/>
+    <path d="M25 44 L 22 50 M28 44 L 30 50" stroke="#f08a3c" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>
+  <!-- Monkey bottom left -->
+  <svg class="critter critter-monkey" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="28" cy="30" r="18" fill="#9c6b4a"/>
+    <circle cx="16" cy="22" r="7" fill="#9c6b4a"/>
+    <circle cx="40" cy="22" r="7" fill="#9c6b4a"/>
+    <circle cx="16" cy="22" r="4" fill="#c89576"/>
+    <circle cx="40" cy="22" r="4" fill="#c89576"/>
+    <ellipse cx="28" cy="34" rx="12" ry="11" fill="#d9b18e"/>
+    <circle cx="23" cy="28" r="2.4" fill="#1f1f1f"/>
+    <circle cx="33" cy="28" r="2.4" fill="#1f1f1f"/>
+    <path d="M24 36 Q 28 40 32 36" stroke="#7a4f33" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>
+  <!-- Tree frog bottom right -->
+  <svg class="critter critter-frog" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="22" cy="26" rx="16" ry="13" fill="#3fb27a"/>
+    <circle cx="13" cy="14" r="7" fill="#46c285"/>
+    <circle cx="31" cy="14" r="7" fill="#46c285"/>
+    <circle cx="13" cy="14" r="4" fill="#f5c542"/>
+    <circle cx="31" cy="14" r="4" fill="#f5c542"/>
+    <circle cx="13" cy="14" r="2" fill="#1f1f1f"/>
+    <circle cx="31" cy="14" r="2" fill="#1f1f1f"/>
+    <path d="M14 30 Q 22 36 30 30" stroke="#1f7350" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="8" cy="38" r="3" fill="#288a5e"/>
+    <circle cx="36" cy="38" r="3" fill="#288a5e"/>
+  </svg>
+  <!-- Butterfly left -->
+  <svg class="critter critter-butterfly" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 19 C 8 6 0 14 8 22 C 2 28 12 32 19 22 Z" fill="#c45c9e"/>
+    <path d="M19 19 C 30 6 38 14 30 22 C 36 28 26 32 19 22 Z" fill="#e0466b"/>
+    <circle cx="11" cy="15" r="2.5" fill="#f5c542"/>
+    <circle cx="27" cy="15" r="2.5" fill="#f5c542"/>
+    <line x1="19" y1="10" x2="19" y2="26" stroke="#1f1f1f" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</div>
 <div id="app">
   <div class="navbar">
     <div class="navbar-inner">
       <div>
-        <div class="navbar-title" id="navTitle">Family Homepage</div>
+        <div class="navbar-title" id="navTitle">Humanji</div>
         <div class="navbar-date" id="navDate"></div>
       </div>
       <div class="navbar-actions">
@@ -808,19 +988,26 @@ function groupByFloor(tasks) {
 function toggleTask(dayIdx,id) { const k=`${dayIdx}-${id}`; S.checks[k]=!S.checks[k]; saveChecks(); render(); }
 
 // ─── TABS ─────────────────────────────────────────────────────────────────────
+const TAB_ICONS = {
+  today: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9.5 21v-6h5v6"/></svg>`,
+  cleaning: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 3l-6 6"/><path d="M14 4l6 6"/><path d="M13 9l-8.5 8.5a2.1 2.1 0 0 0 0 3a2.1 2.1 0 0 0 3 0L16 12"/><path d="M5 16l3 3"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18"/><path d="M8 2.5v4M16 2.5v4"/><circle cx="8.5" cy="13.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="13.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1.1" fill="currentColor" stroke="none"/></svg>`,
+  todos: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5h11M4 12h11M4 17.5h7"/><path d="M18.5 5l1.5 1.5L23 3.5" transform="translate(-3.5 0.5)"/><path d="M18 11l1.3 1.3L22 9.5" transform="translate(-3.2 0.5)"/></svg>`,
+  notes: `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h10l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4.5"/><path d="M8.5 13h7M8.5 16.5h5"/></svg>`,
+};
 const TABS = [
-  {id:"today",    label:"Today",    icon:"🏠"},
-  {id:"cleaning", label:"Cleaning", icon:"🧹"},
-  {id:"calendar", label:"Calendar", icon:"📅"},
-  {id:"todos",    label:"To-do",    icon:"✅"},
-  {id:"notes",    label:"Notes",    icon:"📝"},
+  {id:"today",    label:"Today"},
+  {id:"cleaning", label:"Cleaning"},
+  {id:"calendar", label:"Calendar"},
+  {id:"todos",    label:"To-do"},
+  {id:"notes",    label:"Notes"},
 ];
-const TAB_TITLES = {today:"Family Homepage",cleaning:"Cleaning",calendar:"Calendar",todos:"To-do",notes:"Notes"};
+const TAB_TITLES = {today:"Humanji",cleaning:"Cleaning",calendar:"Calendar",todos:"To-do",notes:"Notes"};
 
 function renderTabBar() {
   document.getElementById("tabBar").innerHTML = TABS.map(t=>
     `<div class="tab-item${S.tab===t.id?" active":""}" onclick="switchTab('${t.id}')">
-      <span class="tab-icon">${t.icon}</span>
+      <span class="tab-icon">${TAB_ICONS[t.id]}</span>
       <span class="tab-label">${t.label}</span>
     </div>`
   ).join("");
@@ -1125,8 +1312,8 @@ function saveIcal(){ const v=document.getElementById("icalInput")?.value.trim();
 function clearIcal(){ S.icalUrl=""; S.calEvents=[]; localStorage.setItem("icalUrl",""); closeSettings(); render(); }
 async function requestNotif(){ if(!("Notification"in window)){alert("Not supported");return;} const p=await Notification.requestPermission(); if(p==="granted"){S.notifEnabled=true;localStorage.setItem("notifEnabled","true");scheduleNotif();closeSettings();showToast("Reminders on ✓");}else{alert("Denied — enable in Safari settings → this site → Notifications");} }
 function saveNotifTime(t){ S.notifTime=t; localStorage.setItem("notifTime",t); scheduleNotif(); }
-function scheduleNotif(){ if(!S.notifEnabled)return; if(window._notifTimer)clearTimeout(window._notifTimer); const[h,m]=S.notifTime.split(":").map(Number); const next=new Date(); next.setHours(h,m,0,0); if(next<=new Date())next.setDate(next.getDate()+1); window._notifTimer=setTimeout(()=>{ const tasks=getDayTasks(todayDayIdx()); new Notification("Family Homepage 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); scheduleNotif(); },next-new Date()); }
-function testNotif(){ const tasks=getDayTasks(todayDayIdx()); new Notification("Family Homepage 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); }
+function scheduleNotif(){ if(!S.notifEnabled)return; if(window._notifTimer)clearTimeout(window._notifTimer); const[h,m]=S.notifTime.split(":").map(Number); const next=new Date(); next.setHours(h,m,0,0); if(next<=new Date())next.setDate(next.getDate()+1); window._notifTimer=setTimeout(()=>{ const tasks=getDayTasks(todayDayIdx()); new Notification("Humanji 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); scheduleNotif(); },next-new Date()); }
+function testNotif(){ const tasks=getDayTasks(todayDayIdx()); new Notification("Humanji 🏠",{body:`${tasks.length} tasks today · ${tasks.reduce((s,t)=>s+t.mins,0)} min`,icon:"icons/icon-192.png"}); }
 function resetToday(){ const di=todayDayIdx(); getDayTasks(di).forEach(t=>delete S.checks[`${di}-${t.id}`]); saveChecks(); closeSettings(); render(); showToast("Today reset"); }
 
 
