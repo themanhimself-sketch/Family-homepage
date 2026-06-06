@@ -751,14 +751,32 @@ function openCalEvent(e) {
   // Also open web as fallback after short delay (app intercepts if installed)
   setTimeout(() => { window.open(webUrl, "_blank"); }, 300);
 }
-function calRows(events) {
+// Store events in a lookup so onclick can reference by index safely
+window._calEventStore = {};
+function calRows(events, storeKey) {
   if (!events.length) return `<div class="cal-empty">Nothing on</div>`;
-  return events.map((e,i)=>`<div class="cal-row" onclick="openCalEvent(${JSON.stringify(e).replace(/"/g,'&quot;')})" style="cursor:pointer">
+  window._calEventStore[storeKey] = events;
+  return events.map((e,i)=>`<div class="cal-row" onclick="openCalEvent('${storeKey}',${i})" style="cursor:pointer">
     <div class="cal-dot" style="background:${CAL_COLORS[i%CAL_COLORS.length]}"></div>
     <div class="cal-title">${e.summary}</div>
     <div class="cal-time">${fmtTime(e.start,e.allDay)}</div>
     <div style="font-size:12px;color:var(--label3);margin-left:4px">›</div>
   </div>`).join("");
+}
+function openCalEvent(storeKey, idx) {
+  const e = (window._calEventStore[storeKey]||[])[idx];
+  if (!e) return;
+  const fmt = d => d ? new Date(d).toISOString().replace(/-|:|\.\d{3}/g,"") : "";
+  const start = fmt(e.start);
+  const end   = e.end ? fmt(e.end) : fmt(new Date(new Date(e.start).getTime()+3600000));
+  const appUrl = `googlecalendar://event?title=${encodeURIComponent(e.summary)}&start=${start}&end=${end}`;
+  const webUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(e.summary)}`;
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = appUrl;
+  document.body.appendChild(iframe);
+  setTimeout(() => iframe.remove(), 500);
+  setTimeout(() => window.open(webUrl, "_blank"), 300);
 }
 
 function cleaningSection(dayIdx) {
@@ -810,7 +828,7 @@ function renderToday() {
   if (!S.icalUrl) {
     html+=`<div class="setup-cell"><div class="setup-text">Connect your calendar in Settings to see events here.</div><div class="setup-link" onclick="openSettings()">Add calendar →</div></div>`;
   } else {
-    html+=calRows(todayEvents);
+    html+=calRows(todayEvents,"today");
   }
   html+=`</div></div>`;
 
