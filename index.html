@@ -120,6 +120,13 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
 .wx-desc { font-size: 14px; color: var(--label2); margin-left: 4px; }
 .wx-right { margin-left: auto; display: flex; gap: 12px; }
 .wx-stat { font-size: 13px; color: var(--label2); }
+.wx-current { display: flex; align-items: center; gap: 8px; width: 100%; }
+.wx-forecast { display: flex; gap: 0; border-top: 0.5px solid var(--separator); margin-top: 8px; padding-top: 8px; width: 100%; justify-content: space-around; }
+.wx-forecast-day { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+.wx-fc-name { font-size: 11px; color: var(--label3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.wx-fc-icon { font-size: 18px; line-height: 1.3; }
+.wx-fc-hi { font-size: 13px; font-weight: 600; color: var(--label); }
+.wx-fc-lo { font-size: 12px; color: var(--label3); }
 
 /* ── SCROLL BODY ── */
 .scroll-body {
@@ -585,9 +592,21 @@ async function fetchWeather(force) {
   const now = Date.now();
   if (!force && S.weather && (now-S.weatherTs)<30*60*1000) { renderWeather(); return; }
   try {
-    const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.568&longitude=-0.0155&current=temperature_2m,weathercode,windspeed_10m,precipitation&timezone=Europe%2FLondon&forecast_days=1");
+    const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=51.568&longitude=-0.0155&current=temperature_2m,weathercode,windspeed_10m,precipitation&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FLondon&forecast_days=4");
     const d = await r.json();
-    S.weather = { temp:Math.round(d.current.temperature_2m), code:d.current.weathercode, wind:Math.round(d.current.windspeed_10m), rain:d.current.precipitation };
+    S.weather = {
+      temp: Math.round(d.current.temperature_2m),
+      code: d.current.weathercode,
+      wind: Math.round(d.current.windspeed_10m),
+      rain: d.current.precipitation,
+      forecast: d.daily.time.slice(1,4).map((date,i) => ({
+        date,
+        code: d.daily.weathercode[i+1],
+        hi:   Math.round(d.daily.temperature_2m_max[i+1]),
+        lo:   Math.round(d.daily.temperature_2m_min[i+1]),
+        rain: d.daily.precipitation_sum[i+1],
+      }))
+    };
     S.weatherTs = now;
     localStorage.setItem("weather",JSON.stringify(S.weather));
     localStorage.setItem("weatherTs",String(now));
@@ -598,8 +617,29 @@ function refreshWeather(){ fetchWeather(true); showToast("Refreshing weather…"
 function renderWeather() {
   const el = document.getElementById("weatherBar");
   if (!S.weather) { el.innerHTML=`<span class="wx-stat" style="color:var(--label3)">Tap ↻ to load weather</span>`; return; }
-  const {temp,code,wind,rain} = S.weather;
-  el.innerHTML=`<span class="wx-icon">${WX_CODES[code]||"🌡"}</span><span class="wx-temp">${temp}°C</span><span class="wx-desc">${WX_DESC[code]||""}</span><div class="wx-right"><span class="wx-stat">💨 ${wind} km/h</span><span class="wx-stat">${rain>0?`🌧 ${rain}mm`:"No rain"}</span></div>`;
+  const {temp,code,wind,rain,forecast} = S.weather;
+  const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const forecastHtml = (forecast||[]).map(f => {
+    const d = new Date(f.date+"T12:00:00");
+    return `<div class="wx-forecast-day">
+      <div class="wx-fc-name">${dayNames[d.getDay()]}</div>
+      <div class="wx-fc-icon">${WX_CODES[f.code]||"🌡"}</div>
+      <div class="wx-fc-hi">${f.hi}°</div>
+      <div class="wx-fc-lo">${f.lo}°</div>
+    </div>`;
+  }).join("");
+  el.innerHTML=`
+    <div class="wx-current">
+      <span class="wx-icon">${WX_CODES[code]||"🌡"}</span>
+      <span class="wx-temp">${temp}°C</span>
+      <span class="wx-desc">${WX_DESC[code]||""}</span>
+      <div class="wx-right">
+        <span class="wx-stat">💨 ${wind} km/h</span>
+        <span class="wx-stat">${rain>0?`🌧 ${rain}mm`:"No rain"}</span>
+      </div>
+    </div>
+    ${forecastHtml ? `<div class="wx-forecast">${forecastHtml}</div>` : ""}
+  `;
 }
 
 // ─── CALENDAR ────────────────────────────────────────────────────────────────
@@ -689,12 +729,35 @@ function render() {
 function switchTab(t) { S.tab=t; S.activeDay=todayDayIdx(); render(); document.getElementById("scrollBody").scrollTop=0; }
 
 // ─── RENDER HELPERS ──────────────────────────────────────────────────────────
+function calGoogleLink(e) {
+  // Opens event search in Google Calendar app (installed on iPad)
+  // Falls back to web if app not installed
+  const fmt = d => d ? d.toISOString().replace(/-|:|\.\d{3}/g,"") : "";
+  const start = fmt(e.start);
+  const end   = e.end ? fmt(e.end) : fmt(new Date(e.start.getTime()+3600000));
+  const title = encodeURIComponent(e.summary);
+  // Try Google Calendar app deep link first, fallback to web
+  return `googlecalendar://event?title=${title}&start=${start}&end=${end}`;
+}
+function openCalEvent(e) {
+  // Try app deep link; if it fails (app not installed), fall back to web search
+  const appUrl = calGoogleLink(e);
+  const webUrl = `https://calendar.google.com/calendar/r/search?q=${encodeURIComponent(e.summary)}`;
+  const iframe = document.createElement("iframe");
+  iframe.style.display = "none";
+  iframe.src = appUrl;
+  document.body.appendChild(iframe);
+  setTimeout(() => { iframe.remove(); }, 500);
+  // Also open web as fallback after short delay (app intercepts if installed)
+  setTimeout(() => { window.open(webUrl, "_blank"); }, 300);
+}
 function calRows(events) {
   if (!events.length) return `<div class="cal-empty">Nothing on</div>`;
-  return events.map((e,i)=>`<div class="cal-row">
+  return events.map((e,i)=>`<div class="cal-row" onclick="openCalEvent(${JSON.stringify(e).replace(/"/g,'&quot;')})" style="cursor:pointer">
     <div class="cal-dot" style="background:${CAL_COLORS[i%CAL_COLORS.length]}"></div>
     <div class="cal-title">${e.summary}</div>
     <div class="cal-time">${fmtTime(e.start,e.allDay)}</div>
+    <div style="font-size:12px;color:var(--label3);margin-left:4px">›</div>
   </div>`).join("");
 }
 
