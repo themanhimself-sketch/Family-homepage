@@ -185,34 +185,6 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
   position: fixed; inset: 0; z-index: 1; pointer-events: none;
 }
 
-/* ── RETURN TO HUMANJI BUTTON ── */
-#returnBtn {
-  position: fixed;
-  left: 50%;
-  bottom: calc(80px + var(--safe-b));
-  transform: translateX(-50%) translateY(20px);
-  z-index: 9999;
-  padding: 13px 22px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #f5b730, #d68e1c);
-  color: #3a2408;
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  box-shadow: 0 6px 20px rgba(40,20,5,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  cursor: pointer;
-}
-#returnBtn.show {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
-}
-#returnBtn:active { transform: translateX(-50%) translateY(1px) scale(0.97); }
 
 /* ── SCROLL BODY ── */
 .scroll-body {
@@ -702,15 +674,6 @@ html, body { letter-spacing: 0.01em; }
 .large-title { font-weight: 800; letter-spacing: -0.01em; }
 .large-subtitle { font-family:var(--font-mono); font-size:12px; letter-spacing:0.06em; color:var(--label2); text-transform:uppercase; }
 
-/* ── RETURN TO HUMANJI button → deck button ── */
-#returnBtn {
-  background: linear-gradient(180deg, #2a2c2f, #141517) !important;
-  color: var(--accent) !important;
-  font-family: var(--font-mono) !important;
-  font-weight: 600 !important; letter-spacing: 0.08em; text-transform: uppercase;
-  border: 1px solid var(--accent) !important;
-  box-shadow: 0 0 12px rgba(0,178,90,0.4), 0 6px 18px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.08) inset !important;
-}
 
 </style>
 </head>
@@ -1053,31 +1016,7 @@ function openCalEvent(storeKey, idx) {
   document.body.appendChild(iframe);
   setTimeout(() => iframe.remove(), 500);
   setTimeout(() => window.open(webUrl, "_blank"), 300);
-  showReturnButton();
 }
-function showReturnButton() {
-  // A floating "back to Humanji" pill that's waiting when you return from Google Calendar
-  let btn = document.getElementById("returnBtn");
-  if (!btn) {
-    btn = document.createElement("button");
-    btn.id = "returnBtn";
-    btn.innerHTML = "← Back to Humanji";
-    btn.onclick = hideReturnButton;
-    document.body.appendChild(btn);
-  }
-  btn.classList.add("show");
-}
-function hideReturnButton() {
-  const btn = document.getElementById("returnBtn");
-  if (btn) btn.classList.remove("show");
-}
-// When the user comes back to Humanji (tab/app becomes visible again), surface the button
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && document.getElementById("returnBtn")) {
-    document.getElementById("returnBtn").classList.add("show");
-  }
-});
-
 function cleaningSection(dayIdx) {
   const tasks=getDayTasks(dayIdx);
   if (!tasks.length) return `<div class="rest-day"><div class="rest-emoji">🌿</div><div class="rest-title">Rest day</div><div class="rest-sub">No cleaning today</div></div>`;
