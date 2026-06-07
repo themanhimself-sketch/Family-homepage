@@ -176,6 +176,14 @@ html, body { height: 100%; background: var(--sys-grouped-bg); font-family: var(-
   content:""; position:absolute; inset:0;
   background: radial-gradient(140% 100% at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.18) 100%);
 }
+/* category colour wash — constant dark level, only HUE changes with weather */
+#wx-tint {
+  position:absolute; inset:0; opacity:0.55; transition: background 2.5s ease;
+  background: radial-gradient(130% 90% at 50% 0%, rgba(40,52,68,0.5) 0%, rgba(0,0,0,0) 60%);
+}
+#weather-canvas {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+}
 
 /* ── RETURN TO HUMANJI BUTTON ── */
 #returnBtn {
@@ -645,6 +653,11 @@ html, body { letter-spacing: 0.01em; }
 /* ── PROGRESS BAR → PITCH FADER ── */
 .progress-row { align-items:center; gap:12px; }
 .progress-label { font-family:var(--font-mono); font-size:11px; letter-spacing:0.04em; color:var(--label2); }
+.pct-readout {
+  color: var(--accent) !important; font-weight:700; font-size:13px !important;
+  min-width:42px; text-align:right;
+  text-shadow: 0 0 6px var(--accent);
+}
 .progress-track {
   height: 10px !important; border-radius: 3px !important;
   background: linear-gradient(180deg, var(--metal-groove), rgba(0,0,0,0.05)) !important;
@@ -702,7 +715,8 @@ html, body { letter-spacing: 0.01em; }
 </style>
 </head>
 <body>
-<div id="deck-bg"></div>
+<div id="deck-bg"><div id="wx-tint"></div></div>
+<canvas id="weather-canvas"></canvas>
 <div id="app">
   <div class="navbar">
     <div class="navbar-inner">
@@ -846,6 +860,7 @@ async function fetchWeather(force) {
     localStorage.setItem("weatherTs",String(now));
   } catch(e){ S.weather=null; }
   renderWeather();
+  applyWeatherScene();
 }
 function refreshWeather(){ fetchWeather(true); showToast("Refreshing weather…"); }
 function renderWeather() {
@@ -919,8 +934,13 @@ function parseIcal(text) {
     const b=blocks[i], get=k=>{ const m=b.match(new RegExp(k+"[^:]*:([^\\r\\n]+)")); return m?m[1].trim():""; };
     const summary=get("SUMMARY"), dtstart=get("DTSTART"), dtend=get("DTEND");
     const allDay=!dtstart.includes("T");
-    const start=parseIcalDate(dtstart), end=parseIcalDate(dtend);
-    if (summary&&start) events.push({summary,start,end,allDay});
+    let start=parseIcalDate(dtstart), end=parseIcalDate(dtend);
+    // iCal all-day DTEND is exclusive (00:00 the next day) — pull it back to the actual last day
+    if (allDay && end) end = new Date(end.getTime() - 24*60*60*1000);
+    // ignore recurring events for now (parser doesn't expand RRULE; a bare DTSTART would
+    // otherwise show the event only on its original date, but stale series can mislead)
+    const isRecurring = /\bRRULE/.test(b);
+    if (summary&&start) events.push({summary,start,end,allDay,isRecurring});
   }
   return events;
 }
@@ -932,7 +952,12 @@ function parseIcalDate(s) {
 function getEventsForDate(date) {
   const s=new Date(date); s.setHours(0,0,0,0);
   const e=new Date(date); e.setHours(23,59,59,999);
-  return S.calEvents.filter(ev=>ev.start<=e&&(ev.end?ev.end>=s:ev.start>=s)).sort((a,b)=>a.start-b.start);
+  return S.calEvents.filter(ev=>{
+    if (ev.isRecurring) return false;  // can't expand RRULE reliably — skip to avoid phantoms
+    const evStart = ev.start;
+    const evEnd = ev.end && ev.end >= ev.start ? ev.end : ev.start; // guard bad/!present end
+    return evStart <= e && evEnd >= s;  // range overlaps this day
+  }).sort((a,b)=>a.start-b.start);
 }
 function fmtTime(d,allDay){ return allDay?"All day":d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }
 
@@ -1057,14 +1082,12 @@ function cleaningSection(dayIdx) {
   const tasks=getDayTasks(dayIdx);
   if (!tasks.length) return `<div class="rest-day"><div class="rest-emoji">🌿</div><div class="rest-title">Rest day</div><div class="rest-sub">No cleaning today</div></div>`;
   const done=tasks.filter(t=>S.checks[`${dayIdx}-${t.id}`]).length;
-  const total=tasks.reduce((s,t)=>s+t.mins,0);
-  const remaining=tasks.filter(t=>!S.checks[`${dayIdx}-${t.id}`]).reduce((s,t)=>s+t.mins,0);
-  const pct=Math.min(100,Math.round(total/60*100));
-  const allDone=done===tasks.length;
+  const pct=tasks.length?Math.round(done/tasks.length*100):0;   // % of TASKS done
+  const allDone=done===tasks.length && tasks.length>0;
   let html=`<div class="progress-row">
-    <span class="progress-label">${remaining}m left</span>
-    <div class="progress-track"><div class="progress-fill${allDone?" done":pct>100?" over":""}" style="width:${pct}%"></div></div>
-    <span class="progress-label">${total}m</span>
+    <span class="progress-label">${done}/${tasks.length}</span>
+    <div class="progress-track"><div class="progress-fill${allDone?" done":""}" style="width:${pct}%"></div></div>
+    <span class="progress-label pct-readout">${pct}%</span>
   </div>`;
   groupByFloor(tasks).forEach(([floor,ft])=>{
     html+=`<div class="inset-header">${FLOOR_NAMES[floor]||"Other"}</div>`;
@@ -1329,7 +1352,109 @@ function testNotif(){ const tasks=getDayTasks(todayDayIdx()); new Notification("
 function resetToday(){ const di=todayDayIdx(); getDayTasks(di).forEach(t=>delete S.checks[`${di}-${t.id}`]); saveChecks(); closeSettings(); render(); showToast("Today reset"); }
 
 
-// (weather backdrop engine removed — static deck theme)
+// ─── WEATHER BACKDROP (deck edition — weather only, constant dark level) ─────
+const WX_CAT_TINT = {
+  // constant DARK level; only the hue/character changes with the day's weather
+  clear:    "radial-gradient(130% 90% at 50% 0%, rgba(30,58,92,0.55) 0%, rgba(0,0,0,0) 62%)",
+  cloudy:   "radial-gradient(130% 90% at 50% 0%, rgba(48,56,68,0.55) 0%, rgba(0,0,0,0) 62%)",
+  overcast: "radial-gradient(130% 90% at 50% 0%, rgba(52,56,62,0.6) 0%, rgba(0,0,0,0) 60%)",
+  rain:     "radial-gradient(130% 90% at 50% 0%, rgba(36,46,58,0.62) 0%, rgba(0,0,0,0) 60%)",
+  snow:     "radial-gradient(130% 90% at 50% 0%, rgba(46,54,66,0.55) 0%, rgba(0,0,0,0) 62%)",
+  storm:    "radial-gradient(130% 90% at 50% 0%, rgba(28,32,44,0.7) 0%, rgba(0,0,0,0) 58%)",
+  fog:      "radial-gradient(130% 90% at 50% 0%, rgba(54,58,64,0.6) 0%, rgba(0,0,0,0) 64%)",
+};
+function wxCategory(code){
+  if (code===0||code===1) return "clear";
+  if (code===2) return "cloudy";
+  if (code===3) return "overcast";
+  if (code===45||code===48) return "fog";
+  if ([51,53,55,61,63,65,80,81,82].includes(code)) return "rain";
+  if ([71,73,75,85,86].includes(code)) return "snow";
+  if ([95,96,99].includes(code)) return "storm";
+  return "cloudy";
+}
+
+let _wxCanvas, _wxCtx, _wxParticles=[], _wxClouds=[], _wxRAF=null, _wxFlash=0;
+function applyWeatherScene(){
+  if (!S.weather) return;
+  const cat = wxCategory(S.weather.code);
+  const tint = document.getElementById("wx-tint");
+  if (tint) tint.style.background = WX_CAT_TINT[cat] || WX_CAT_TINT.cloudy;
+  startWeatherFx(cat);
+}
+function resizeWxCanvas(){
+  if (!_wxCanvas) return;
+  const dpr = window.devicePixelRatio||1;
+  _wxCanvas.width = innerWidth*dpr; _wxCanvas.height = innerHeight*dpr;
+  _wxCanvas.style.width = innerWidth+"px"; _wxCanvas.style.height = innerHeight+"px";
+  _wxCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+function startWeatherFx(cat){
+  _wxCanvas = document.getElementById("weather-canvas");
+  if (!_wxCanvas) return;
+  _wxCtx = _wxCanvas.getContext("2d");
+  resizeWxCanvas();
+  if (_wxRAF) cancelAnimationFrame(_wxRAF);
+  _wxParticles=[]; _wxClouds=[];
+  const W=innerWidth, H=innerHeight;
+
+  // drifting clouds for cloudy/overcast/rain/storm/fog
+  if (["cloudy","overcast","rain","storm","fog"].includes(cat)){
+    const n = cat==="overcast"||cat==="storm"?5:3;
+    for (let i=0;i<n;i++) _wxClouds.push({
+      x:Math.random()*W, y:30+Math.random()*(H*0.4),
+      r:80+Math.random()*120, sp:0.08+Math.random()*0.18,
+      a: cat==="fog"?0.10:0.06+Math.random()*0.05
+    });
+  }
+  // rain / storm drops
+  if (cat==="rain"||cat==="storm"){
+    const n = cat==="storm"?220:150;
+    for (let i=0;i<n;i++) _wxParticles.push({x:Math.random()*W,y:Math.random()*H,l:8+Math.random()*10,sp:6+Math.random()*5});
+  }
+  // snow flakes
+  if (cat==="snow"){
+    for (let i=0;i<90;i++) _wxParticles.push({x:Math.random()*W,y:Math.random()*H,r:1.5+Math.random()*2.5,sp:0.6+Math.random()*1.1,dx:(Math.random()-0.5)*0.6});
+  }
+
+  const frame = () => {
+    const W=innerWidth, H=innerHeight;
+    _wxCtx.clearRect(0,0,W,H);
+
+    // clouds
+    _wxClouds.forEach(cl=>{
+      cl.x += cl.sp; if (cl.x-cl.r > W) cl.x = -cl.r;
+      const g=_wxCtx.createRadialGradient(cl.x,cl.y,0,cl.x,cl.y,cl.r);
+      g.addColorStop(0,`rgba(200,210,225,${cl.a})`); g.addColorStop(1,"rgba(200,210,225,0)");
+      _wxCtx.fillStyle=g; _wxCtx.beginPath(); _wxCtx.arc(cl.x,cl.y,cl.r,0,7); _wxCtx.fill();
+    });
+
+    if (cat==="rain"||cat==="storm"){
+      _wxCtx.strokeStyle="rgba(150,170,200,0.35)"; _wxCtx.lineWidth=1.1;
+      _wxParticles.forEach(p=>{
+        _wxCtx.beginPath(); _wxCtx.moveTo(p.x,p.y); _wxCtx.lineTo(p.x-1.5,p.y+p.l); _wxCtx.stroke();
+        p.y+=p.sp; p.x-=0.4; if (p.y>H){p.y=-10;p.x=Math.random()*W;}
+      });
+      if (cat==="storm"){
+        if (Math.random()<0.004) _wxFlash=1;
+        if (_wxFlash>0){ _wxCtx.fillStyle=`rgba(210,225,255,${_wxFlash*0.18})`; _wxCtx.fillRect(0,0,W,H); _wxFlash-=0.05; }
+      }
+    }
+    if (cat==="snow"){
+      _wxCtx.fillStyle="rgba(255,255,255,0.7)";
+      _wxParticles.forEach(p=>{
+        _wxCtx.beginPath(); _wxCtx.arc(p.x,p.y,p.r,0,7); _wxCtx.fill();
+        p.y+=p.sp; p.x+=p.dx; if (p.y>H){p.y=-6;p.x=Math.random()*W;}
+      });
+    }
+    _wxRAF = requestAnimationFrame(frame);
+  };
+  // static categories (clear/fog) still get clouds/none but no animation loop needed unless clouds exist
+  if (_wxParticles.length || _wxClouds.length) frame();
+  else _wxCtx.clearRect(0,0,innerWidth,innerHeight);
+}
+window.addEventListener("resize", ()=>{ if(S.weather){ resizeWxCanvas(); applyWeatherScene(); } });
+
 
 // ─── INSTALL / TOAST ─────────────────────────────────────────────────────────
 function checkInstall(){ if(localStorage.getItem("installDismissed")||window.navigator.standalone||!/Safari/.test(navigator.userAgent)||/Chrome/.test(navigator.userAgent))return; document.getElementById("installBanner").innerHTML=`<div class="install-banner"><span class="install-text">Tap <strong>⎙ Share</strong> → <strong>Add to Home Screen</strong> for daily alerts</span><span class="install-close" onclick="localStorage.setItem('installDismissed','1');this.closest('.install-banner').remove()">×</span></div>`; }
@@ -1339,6 +1464,7 @@ function showToast(msg){ const el=document.createElement("div"); el.className="t
 document.getElementById("navDate").textContent = new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
 load(); render(); checkInstall();
 fetchWeather();
+if (S.weather) applyWeatherScene();
 if (S.icalUrl) fetchCal(false);
 if (S.notifEnabled&&typeof Notification!=="undefined"&&Notification.permission==="granted") scheduleNotif();
 
