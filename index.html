@@ -1134,6 +1134,33 @@ function renderToday() {
     </div>`;
   }
 
+  // Health floor
+  const HC_KEY='healthChecks';
+  const hDate=new Date().toDateString();
+  let hc=JSON.parse(localStorage.getItem(HC_KEY)||'{}');
+  if(hc.date!==hDate) hc={date:hDate,done:{}};
+  const healthItems=[
+    {id:'water',icon:'💧',label:'Drink 2 litres of water'},
+    {id:'walk', icon:'🚶',label:'Walk for 20 minutes'},
+    {id:'bed',  icon:'🌙',label:'In bed by midnight'},
+    {id:'fast', icon:'⏱️',label:'No food after 9pm'},
+  ];
+  html+=`<div class="table-group">
+    <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px">
+      <span>Health floor</span>
+      <span style="font-weight:500;color:var(--label2)">${healthItems.filter(h=>hc.done[h.id]).length}/${healthItems.length}</span>
+    </div>
+    <div class="table-card">
+      ${healthItems.map(h=>`
+        <div class="table-row no-indent" onclick="toggleHealth('${h.id}')">
+          <div class="row-check ${hc.done[h.id]?'checked':''}"><span class="row-check-tick">✓</span></div>
+          <div class="row-body">
+            <div class="row-label" style="${hc.done[h.id]?'opacity:.4;text-decoration:line-through':''}">${h.icon} ${h.label}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+
   return html+'<div style="height:8px"></div>';
 }
 
@@ -1213,6 +1240,7 @@ function renderTodos() {
 }
 function addTodo(){ const inp=document.getElementById("todoInput"); const v=inp?.value.trim(); if(!v)return; S.todos.unshift({id:Date.now().toString(),text:v,done:false}); saveTodos(); inp.value=""; render(); }
 function toggleTodo(id){ const t=S.todos.find(t=>t.id===id); if(t){t.done=!t.done; saveTodos(); render();} }
+function toggleHealth(id){const HC_KEY='healthChecks';const hDate=new Date().toDateString();let hc=JSON.parse(localStorage.getItem(HC_KEY)||'{}');if(hc.date!==hDate)hc={date:hDate,done:{}};hc.done[id]=!hc.done[id];localStorage.setItem(HC_KEY,JSON.stringify(hc));render();}
 function deleteTodo(id){ S.todos=S.todos.filter(t=>t.id!==id); saveTodos(); render(); }
 function clearDoneTodos(){ S.todos=S.todos.filter(t=>!t.done); saveTodos(); render(); }
 
