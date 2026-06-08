@@ -1140,10 +1140,12 @@ function renderToday() {
   let hc=JSON.parse(localStorage.getItem(HC_KEY)||'{}');
   if(hc.date!==hDate) hc={date:hDate,done:{}};
   const healthItems=[
-    {id:'water',icon:'💧',label:'Drink 2 litres of water'},
-    {id:'walk', icon:'🚶',label:'Walk for 20 minutes'},
-    {id:'bed',  icon:'🌙',label:'In bed by midnight'},
-    {id:'fast', icon:'⏱️',label:'No food after 9pm'},
+    {id:'water', icon:'💧',label:'Drink 2 litres of water'},
+    {id:'active',icon:'🏃',label:'Do an activity'},
+    {id:'bed',   icon:'🌙',label:'In bed by 11pm'},
+    {id:'fast',  icon:'⏱️',label:'No food after 8pm'},
+    {id:'log',   icon:'📓',label:'Log all food in diary'},
+    {id:'weigh', icon:'⚖️',label:'Daily weigh-in'},
   ];
   html+=`<div class="table-group">
     <div class="table-group-header" style="display:flex;justify-content:space-between;padding-right:4px">
